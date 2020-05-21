@@ -10,7 +10,6 @@ import SpriteKit
 
 class Box : SKSpriteNode {
     
-    
     init(size: CGSize) {
         super.init(texture: SKTexture(imageNamed: "box"), color: .clear, size: size)
         configureBox()
@@ -22,14 +21,17 @@ class Box : SKSpriteNode {
     
     func configureBox() {
         
-        self.physicsBody = SKPhysicsBody(circleOfRadius: self.size.width/2)
+        let size = CGSize(width: self.size.width , height: self.size.height)
+        
+        self.physicsBody = SKPhysicsBody(rectangleOf: size)
         self.physicsBody?.categoryBitMask = PhysicsCategories.boxCategory
-        self.physicsBody?.contactTestBitMask = PhysicsCategories.boxCategory
-        self.physicsBody?.collisionBitMask = PhysicsCategories.boxCategory
-        self.physicsBody?.allowsRotation = false
+        self.physicsBody?.contactTestBitMask = PhysicsCategories.shooterCategory
+        self.physicsBody?.collisionBitMask = PhysicsCategories.boxCategory | PhysicsCategories.shooterCategory
+        self.physicsBody?.usesPreciseCollisionDetection = true
+//        self.physicsBody?.allowsRotation = false
         self.physicsBody?.isDynamic = false
         
-        self.name = "boat"
+        self.name = "box"
         self.zPosition = 0
     }
     
