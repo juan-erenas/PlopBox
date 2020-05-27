@@ -11,6 +11,9 @@
 		4467EC7124736C7000BDAA4D /* Box.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4467EC7024736C7000BDAA4D /* Box.swift */; };
 		4467EC7324736F2500BDAA4D /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4467EC7224736F2500BDAA4D /* Settings.swift */; };
 		4476260E24759F8700F636F7 /* ShooterBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4476260D24759F8700F636F7 /* ShooterBox.swift */; };
+		44C31D0B247B426000C25149 /* InvisibleBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44C31D0A247B426000C25149 /* InvisibleBox.swift */; };
+		44F92DED247AEB030072096E /* BoxShootingAnimation.atlas in Resources */ = {isa = PBXBuildFile; fileRef = 44F92DEC247AEB020072096E /* BoxShootingAnimation.atlas */; };
+		44F92DEF247AEB960072096E /* BoxShooter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44F92DEE247AEB960072096E /* BoxShooter.swift */; };
 		44FECD3C2473209D00805D0F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44FECD3B2473209D00805D0F /* AppDelegate.swift */; };
 		44FECD422473209D00805D0F /* MenuScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44FECD412473209D00805D0F /* MenuScene.swift */; };
 		44FECD442473209D00805D0F /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44FECD432473209D00805D0F /* GameViewController.swift */; };
@@ -25,6 +28,9 @@
 		4467EC7024736C7000BDAA4D /* Box.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Box.swift; sourceTree = "<group>"; };
 		4467EC7224736F2500BDAA4D /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
 		4476260D24759F8700F636F7 /* ShooterBox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShooterBox.swift; sourceTree = "<group>"; };
+		44C31D0A247B426000C25149 /* InvisibleBox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InvisibleBox.swift; sourceTree = "<group>"; };
+		44F92DEC247AEB020072096E /* BoxShootingAnimation.atlas */ = {isa = PBXFileReference; lastKnownFileType = folder.skatlas; path = BoxShootingAnimation.atlas; sourceTree = "<group>"; };
+		44F92DEE247AEB960072096E /* BoxShooter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoxShooter.swift; sourceTree = "<group>"; };
 		44FECD382473209D00805D0F /* PlopBox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PlopBox.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		44FECD3B2473209D00805D0F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		44FECD412473209D00805D0F /* MenuScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuScene.swift; sourceTree = "<group>"; };
@@ -79,6 +85,7 @@
 		44FECD552473243B00805D0F /* View */ = {
 			isa = PBXGroup;
 			children = (
+				44F92DEC247AEB020072096E /* BoxShootingAnimation.atlas */,
 				44FECD4A2473209E00805D0F /* LaunchScreen.storyboard */,
 				44FECD482473209E00805D0F /* Assets.xcassets */,
 			);
@@ -98,10 +105,12 @@
 		44FECD572473244C00805D0F /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				4467EC6E2473634E00BDAA4D /* BoxSet.swift */,
 				4467EC7024736C7000BDAA4D /* Box.swift */,
+				44C31D0A247B426000C25149 /* InvisibleBox.swift */,
 				4476260D24759F8700F636F7 /* ShooterBox.swift */,
+				44F92DEE247AEB960072096E /* BoxShooter.swift */,
 				4467EC7224736F2500BDAA4D /* Settings.swift */,
+				4467EC6E2473634E00BDAA4D /* BoxSet.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -165,6 +174,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				44FECD472473209D00805D0F /* Main.storyboard in Resources */,
+				44F92DED247AEB030072096E /* BoxShootingAnimation.atlas in Resources */,
 				44FECD492473209E00805D0F /* Assets.xcassets in Resources */,
 				44FECD4C2473209E00805D0F /* LaunchScreen.storyboard in Resources */,
 			);
@@ -184,6 +194,8 @@
 				4467EC7124736C7000BDAA4D /* Box.swift in Sources */,
 				4467EC7324736F2500BDAA4D /* Settings.swift in Sources */,
 				4467EC6F2473634E00BDAA4D /* BoxSet.swift in Sources */,
+				44C31D0B247B426000C25149 /* InvisibleBox.swift in Sources */,
+				44F92DEF247AEB960072096E /* BoxShooter.swift in Sources */,
 				44FECD3C2473209D00805D0F /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

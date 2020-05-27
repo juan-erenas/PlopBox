@@ -10,6 +10,8 @@ import SpriteKit
 
 class Box : SKSpriteNode {
     
+    var hasBeenChecked = false
+    
     init(size: CGSize) {
         super.init(texture: SKTexture(imageNamed: "box"), color: .clear, size: size)
         configureBox()
@@ -23,11 +25,11 @@ class Box : SKSpriteNode {
         
         let size = CGSize(width: self.size.width , height: self.size.height)
         
+        self.anchorPoint = CGPoint(x: 0, y: 0.5)
         self.physicsBody = SKPhysicsBody(rectangleOf: size)
         self.physicsBody?.categoryBitMask = PhysicsCategories.boxCategory
         self.physicsBody?.contactTestBitMask = PhysicsCategories.shooterCategory
         self.physicsBody?.collisionBitMask = PhysicsCategories.boxCategory | PhysicsCategories.shooterCategory
-        self.physicsBody?.usesPreciseCollisionDetection = true
 //        self.physicsBody?.allowsRotation = false
         self.physicsBody?.isDynamic = false
         

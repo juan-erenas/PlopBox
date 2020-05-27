@@ -23,6 +23,7 @@ class ShooterBox : SKSpriteNode {
     private func configureBox() {
         let size = CGSize(width: self.size.width, height: self.size.height)
         
+        self.anchorPoint = CGPoint(x: 0, y: 0.5)
         self.physicsBody = SKPhysicsBody(rectangleOf: size)
         self.physicsBody?.allowsRotation = false
         self.physicsBody?.isDynamic = false
