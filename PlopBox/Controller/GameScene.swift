@@ -26,6 +26,7 @@ class GameScene: SKScene {
         addBoxShooter()
         addBoxSet()
         createScoreLabel()
+        addConveyorBelt()
         
         backgroundColor = .white
         
@@ -46,16 +47,16 @@ class GameScene: SKScene {
     
     func addShootingBox() {
         let size = (0.8 * self.frame.height)/6
-        shootingBox = ShooterBox(size: CGSize(width: size, height: size))
         
         let fourthOfWidth = self.frame.width/4
         let fourthOfHeight = self.frame.height/4
-        let xPos = self.frame.midX + fourthOfWidth - (shootingBox.size.width/2)
+        let xPos = self.frame.midX + fourthOfWidth - (size/2)
         let yPos = self.frame.midY - fourthOfHeight
-        shootingBox.position = CGPoint(x: xPos, y: yPos)
+        let position = CGPoint(x: xPos, y: yPos)
+        
+        shootingBox = ShooterBox(size: CGSize(width: size, height: size),position: position)
         
         worldNode.addChild(shootingBox)
-        
     }
     
     func addBoxShooter() {
@@ -73,7 +74,8 @@ class GameScene: SKScene {
         scoreLabel!.fontSize = 50.0
         scoreLabel?.horizontalAlignmentMode = .center
         scoreLabel?.verticalAlignmentMode = .center
-        scoreLabel!.fontColor = UIColor.white
+        let color = UIColor(red: 80/255, green: 95/255, blue: 103/255, alpha: 1)
+        scoreLabel!.fontColor = color
         scoreLabel!.position = CGPoint(x: frame.midX, y: frame.maxY - frame.height/15)
         scoreLabel!.zPosition = 11
         worldNode.addChild(scoreLabel!)
@@ -90,10 +92,17 @@ class GameScene: SKScene {
         }
     }
     
+    func addConveyorBelt() {
+        //insert code for conveyor belt
+    }
+    
     @objc func shootBox() {
+        
+        if shootingBox.currentlyShooting == true {return}
         
         boxShooter.shoot()
         shootingBox.removeAllActions()
+        shootingBox.currentlyShooting = true
         
         if willImpact() {
             shootingBox.addPhysicsBody()
@@ -104,7 +113,7 @@ class GameScene: SKScene {
         } else {
             addPointToScore()
 //            boxSet.speedUpBoxes()
-            let originalPosition = shootingBox.position
+            let originalPosition = shootingBox.shootingPos
             let adjustedPosition = CGPoint(x: originalPosition.x + shootingBox.size.width/4, y: originalPosition.y)
             let yPos = shootingBox.position.y
             let move = SKAction.moveTo(x: boxSet.center.x, duration: 0.1)
@@ -112,10 +121,15 @@ class GameScene: SKScene {
                 self.boxSet.addShooterBoxToLine(atYPos: yPos)
                 self.shootingBox.position = adjustedPosition
                 self.shakeCamera(layer: self.worldNode, duration: 0.1)
+                self.boxSet.speedUpBoxes()
+                self.shootingBox.currentlyShooting = false
+                
+                let generator = UIImpactFeedbackGenerator(style: .medium)
+                generator.impactOccurred()
             }
             let comeOutOfBoxShooter = SKAction.moveTo(x: originalPosition.x, duration: 0.5)
             
-            let sequence = SKAction.sequence([move,addToLineAndReset,comeOutOfBoxShooter])
+            let sequence = SKAction.sequence([move, addToLineAndReset, comeOutOfBoxShooter])
             shootingBox.run(sequence)
         }
         

@@ -78,9 +78,8 @@ class BoxSet : SKNode {
         let totalDistance = screenSize + boxHeightAndWidth
         
         for box in self.children {
-
             let moveBox = SKAction.moveBy(x: 0, y: -totalDistance - 10, duration: Double(moveBoxDuration))
-            box.run(moveBox)
+            box.run(moveBox,withKey: "move")
             
         }
     }
@@ -100,7 +99,7 @@ class BoxSet : SKNode {
         boxArray.append(box)
         
         let moveBox = SKAction.moveBy(x: 0, y: -totalDistance - 10, duration: Double(moveBoxDuration))
-        box.run(moveBox)
+        box.run(moveBox,withKey: "move")
     }
     
     func makeBoxesDynamic() {
@@ -110,8 +109,17 @@ class BoxSet : SKNode {
     }
     
     func speedUpBoxes() {
-        speedMultiplier -= 0.05
-        moveBoxDuration -= speedMultiplier
+        if moveBoxDuration == 2 {return}
+        moveBoxDuration -= 0.05
+        
+        for box in children {
+            box.removeAction(forKey: "move")
+        }
+        beginMovingBoxes()
+        
+    }
+    
+    private func decideToMakeBox() {
         
     }
     
@@ -126,7 +134,7 @@ class BoxSet : SKNode {
         boxArray.append(invisibleBox)
         
         let moveBox = SKAction.moveBy(x: 0, y: -totalDistance - 10, duration: Double(moveBoxDuration))
-        invisibleBox.run(moveBox)
+        invisibleBox.run(moveBox,withKey: "move")
     }
     
     private func calculateDuration() -> CGFloat {
@@ -151,7 +159,7 @@ class BoxSet : SKNode {
         let totalDistance = screenSize + boxHeightAndWidth
         
         let moveBox = SKAction.moveBy(x: 0, y: -totalDistance - 10, duration: Double(moveBoxDuration))
-        box.run(moveBox)
+        box.run(moveBox,withKey: "move")
         
         wobble(box: box)
         

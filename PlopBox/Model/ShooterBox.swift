@@ -10,9 +10,14 @@ import SpriteKit
 
 class ShooterBox : SKSpriteNode {
     
+    var shootingPos : CGPoint
+    var currentlyShooting = false
     
-    init(size: CGSize) {
+    
+    init(size: CGSize, position: CGPoint) {
+        shootingPos = position
         super.init(texture: SKTexture(imageNamed: "box"), color: .clear, size: size)
+        self.position = position
         configureBox()
     }
     
