@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		443AA279248312F3005A9647 /* Marsh-Stencil.otf in Resources */ = {isa = PBXBuildFile; fileRef = 443AA278248312F2005A9647 /* Marsh-Stencil.otf */; };
+		44558F59247F9BEF00CB85E5 /* GameOverScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44558F58247F9BEF00CB85E5 /* GameOverScene.swift */; };
 		4467EC6F2473634E00BDAA4D /* BoxSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4467EC6E2473634E00BDAA4D /* BoxSet.swift */; };
 		4467EC7124736C7000BDAA4D /* Box.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4467EC7024736C7000BDAA4D /* Box.swift */; };
 		4467EC7324736F2500BDAA4D /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4467EC7224736F2500BDAA4D /* Settings.swift */; };
@@ -24,6 +26,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		443AA278248312F2005A9647 /* Marsh-Stencil.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Marsh-Stencil.otf"; sourceTree = "<group>"; };
+		44558F58247F9BEF00CB85E5 /* GameOverScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameOverScene.swift; sourceTree = "<group>"; };
 		4467EC6E2473634E00BDAA4D /* BoxSet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoxSet.swift; sourceTree = "<group>"; };
 		4467EC7024736C7000BDAA4D /* Box.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Box.swift; sourceTree = "<group>"; };
 		4467EC7224736F2500BDAA4D /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
@@ -53,6 +57,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		44AAD9E02483159900E472BA /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+				443AA278248312F2005A9647 /* Marsh-Stencil.otf */,
+			);
+			path = Fonts;
+			sourceTree = "<group>";
+		};
 		44FECD2F2473209D00805D0F = {
 			isa = PBXGroup;
 			children = (
@@ -85,6 +97,7 @@
 		44FECD552473243B00805D0F /* View */ = {
 			isa = PBXGroup;
 			children = (
+				44AAD9E02483159900E472BA /* Fonts */,
 				44F92DEC247AEB020072096E /* BoxShootingAnimation.atlas */,
 				44FECD4A2473209E00805D0F /* LaunchScreen.storyboard */,
 				44FECD482473209E00805D0F /* Assets.xcassets */,
@@ -98,6 +111,7 @@
 				44FECD432473209D00805D0F /* GameViewController.swift */,
 				44FECD412473209D00805D0F /* MenuScene.swift */,
 				44FECD53247321E100805D0F /* GameScene.swift */,
+				44558F58247F9BEF00CB85E5 /* GameOverScene.swift */,
 			);
 			path = Controller;
 			sourceTree = "<group>";
@@ -176,6 +190,7 @@
 				44FECD472473209D00805D0F /* Main.storyboard in Resources */,
 				44F92DED247AEB030072096E /* BoxShootingAnimation.atlas in Resources */,
 				44FECD492473209E00805D0F /* Assets.xcassets in Resources */,
+				443AA279248312F3005A9647 /* Marsh-Stencil.otf in Resources */,
 				44FECD4C2473209E00805D0F /* LaunchScreen.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -189,6 +204,7 @@
 			files = (
 				4476260E24759F8700F636F7 /* ShooterBox.swift in Sources */,
 				44FECD422473209D00805D0F /* MenuScene.swift in Sources */,
+				44558F59247F9BEF00CB85E5 /* GameOverScene.swift in Sources */,
 				44FECD442473209D00805D0F /* GameViewController.swift in Sources */,
 				44FECD54247321E100805D0F /* GameScene.swift in Sources */,
 				4467EC7124736C7000BDAA4D /* Box.swift in Sources */,

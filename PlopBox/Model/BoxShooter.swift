@@ -27,17 +27,24 @@ class BoxShooter : SKSpriteNode {
         self.anchorPoint = CGPoint(x: 0, y: 0.5)
         
         let boxShooterAnimatedAtlas = SKTextureAtlas(named: "BoxShootingAnimation")
+        
         var shootFrames : [SKTexture] = []
         
-        let numImages = boxShooterAnimatedAtlas.textureNames.count
-        for i in 1...numImages {
-            let boxShooterTextureName = "BoxShotting00\(i)"
-            shootFrames.append(boxShooterAnimatedAtlas.textureNamed(boxShooterTextureName))
+        boxShooterAnimatedAtlas.preload {
+            
+            //this code is called after swift is done preloading
+            let numImages = boxShooterAnimatedAtlas.textureNames.count
+            for i in 1...numImages {
+                let boxShooterTextureName = "BoxShotting00\(i)"
+                shootFrames.append(boxShooterAnimatedAtlas.textureNamed(boxShooterTextureName))
+            }
+            self.BoxShooterFrames = shootFrames
+            
+            let firstFrameTexture = self.BoxShooterFrames[0]
+            self.texture = firstFrameTexture
+            
         }
-        BoxShooterFrames = shootFrames
         
-        let firstFrameTexture = BoxShooterFrames[0]
-        self.texture = firstFrameTexture
     }
     
     func shoot() {
@@ -46,6 +53,11 @@ class BoxShooter : SKSpriteNode {
 //        shoot.value(forKey: "BoxShootingAnimation")
         self.run(shoot)
     }
+    
+    func preloadTextureAtlas() {
+        
+    }
+    
     
     
 }

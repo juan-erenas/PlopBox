@@ -10,15 +10,19 @@ import SpriteKit
 
 class GameScene: SKScene {
     
-    var boxShooter : BoxShooter!
-    var shootingBox : ShooterBox!
-    var boxSet : BoxSet!
-    var tap = UITapGestureRecognizer()
-    var worldNode = SKNode()
+    private var boxShooter : BoxShooter!
+    private var shootingBox : ShooterBox!
+    private var boxSet : BoxSet!
+    var moveBoxDuration : CGFloat?
+    private var tap = UITapGestureRecognizer()
+    private var worldNode = SKNode()
     //used to prevent multiple contacts from calling game over
-    var gameActive = true
+    private var gameActive = true
     var currentScore = 0
-    var scoreLabel : SKLabelNode?
+    var canRetry = true
+    private var scoreLabel : SKLabelNode?
+    
+    var gameRestarted = false
     
     override func didMove(to view: SKView) {
         self.addChild(worldNode)
@@ -36,6 +40,22 @@ class GameScene: SKScene {
         
         physicsWorld.contactDelegate = self
         physicsWorld.gravity = .zero
+        
+        if gameRestarted {
+            restartGame()
+        }
+    }
+    
+    func restartGame() {
+        //insert code for restarting game after game over
+        canRetry = false
+        currentScore -= 1
+        addPointToScore()
+        
+        if moveBoxDuration != nil {
+            boxSet.moveBoxDuration = moveBoxDuration!
+            boxSet.speedUpBoxes()
+        }
     }
     
     func addBoxSet() {
@@ -94,6 +114,9 @@ class GameScene: SKScene {
     
     func addConveyorBelt() {
         //insert code for conveyor belt
+        
+        
+        
     }
     
     @objc func shootBox() {
@@ -194,12 +217,26 @@ class GameScene: SKScene {
         //add code to go to game over screen
         let wait = SKAction.wait(forDuration: 1)
         
-        let goToMainMenu = SKAction.customAction(withDuration: 0) { (_, _) in
-            let menuScene = MenuScene(size: self.view!.bounds.size)
-            self.view!.presentScene(menuScene)
+        //decides if you should get a chance to retry
+        if currentScore >= 2 && canRetry {
+            let goToGameOverScene = SKAction.customAction(withDuration: 0) { (_, _) in
+                let gameOverScene = GameOverScene(size: self.view!.bounds.size)
+                gameOverScene.currentScore = self.currentScore
+                gameOverScene.moveBoxDuration = self.boxSet.moveBoxDuration
+                self.view!.presentScene(gameOverScene)
+            }
+            let sequence = SKAction.sequence([wait,goToGameOverScene])
+            self.run(sequence)
+            
+        } else {
+            
+            let goToMainMenu = SKAction.customAction(withDuration: 0) { (_, _) in
+                let menuScene = MenuScene(size: self.view!.bounds.size)
+                self.view!.presentScene(menuScene)
+            }
+            let sequence = SKAction.sequence([wait,goToMainMenu])
+            self.run(sequence)
         }
-        let sequence = SKAction.sequence([wait,goToMainMenu])
-        self.run(sequence)
     }
     
     override func update(_ currentTime: TimeInterval) {

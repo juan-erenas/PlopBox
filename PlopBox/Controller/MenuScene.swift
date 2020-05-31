@@ -22,6 +22,8 @@ class MenuScene: SKScene {
     
     override func didMove(to view: SKView) {
         
+        createBackground()
+        
 //        messageNode.zPosition = 1
             
         addChild(menuNode)
@@ -53,7 +55,7 @@ class MenuScene: SKScene {
     func addLabels() {
         let titleLabel1 = SKLabelNode(text: "PLOP")
         titleLabel1.numberOfLines = 2
-        titleLabel1.fontName = "AvenirNext-Bold"
+        titleLabel1.fontName = "Marsh-Stencil"
         titleLabel1.fontSize = 100.0
         titleLabel1.fontColor = UIColor.white
         titleLabel1.position = CGPoint(x: frame.midX, y: frame.midY + frame.height/4)
@@ -61,22 +63,22 @@ class MenuScene: SKScene {
         
         let titleLabel2 = SKLabelNode(text: "BOX")
         titleLabel2.numberOfLines = 2
-        titleLabel2.fontName = "AvenirNext-Bold"
+        titleLabel2.fontName = "Marsh-Stencil"
         titleLabel2.fontSize = 100.0
         titleLabel2.fontColor = UIColor.white
         titleLabel2.position = CGPoint(x: frame.midX, y: titleLabel1.position.y - 100)
         menuNode.addChild(titleLabel2)
         
-        let highscoreLabel = SKLabelNode(text: "Highscore: " + "\(UserDefaults.standard.integer(forKey: "Highscore"))")
+        let highscoreLabel = SKLabelNode(text: "HI-SCORE: " + "\(UserDefaults.standard.integer(forKey: "Highscore"))")
         highscoreLabel.name = "high score label"
-        highscoreLabel.fontName = "AvenirNext-Bold"
+        highscoreLabel.fontName = "Marsh-Stencil"
         highscoreLabel.fontSize = 30.0
         highscoreLabel.fontColor = UIColor.white
         highscoreLabel.position = CGPoint(x: frame.midX, y: titleLabel2.position.y - 70)
         menuNode.addChild(highscoreLabel)
         
-        let recentScoreLabel = SKLabelNode(text: "Recent Score: " + "\(UserDefaults.standard.integer(forKey: "RecentScore"))")
-        recentScoreLabel.fontName = "AvenirNext-Bold"
+        let recentScoreLabel = SKLabelNode(text: "SCORE: " + "\(UserDefaults.standard.integer(forKey: "RecentScore"))")
+        recentScoreLabel.fontName = "Marsh-Stencil"
         recentScoreLabel.fontSize = 30.0
         recentScoreLabel.fontColor = UIColor.white
         recentScoreLabel.position = CGPoint(x: frame.midX, y: highscoreLabel.position.y - recentScoreLabel.frame.size.height*2)
@@ -84,7 +86,7 @@ class MenuScene: SKScene {
         
         
         let playLabel = SKLabelNode(text: "- tap to play -")
-        playLabel.fontName = "AvenirNext-Bold"
+        playLabel.fontName = "Marsh-Stencil"
         playLabel.fontSize = 30.0
         playLabel.fontColor = UIColor.white
         playLabel.position = CGPoint(x: frame.midX, y: self.frame.minY + 150)
@@ -136,36 +138,49 @@ class MenuScene: SKScene {
         label.run(SKAction.repeatForever(sequence))
     }
     
-    //MARK: - Exit Scene Animations
     
-//    @objc func swipedUp() {
-//
-//        if !messageNode.children.isEmpty {return}
-//
-//        goToCharacterSelect()
-//    }
+    
+    
+    func createBackground() {
+        //creates moving background for a parallax effect
+        createMovingBackground(withImageNamed: "main-menu-background", height: frame.height, duration: 20,zPosition: -30)
+        
+//        let background = SKSpriteNode(texture: SKTexture(imageNamed: "background"))
+//        background.size = CGSize(width: frame.width, height: frame.height)
+//        background.zPosition = -40
+//        background.position = CGPoint(x: frame.midX, y: frame.midY)
+//        self.addChild(background)
+        
+        //this is the node that dims everything when the game is paused.
+        
+    }
+    
+    func createMovingBackground(withImageNamed imageName: String,height: CGFloat,duration: Double, zPosition: CGFloat) {
+        let backgroundTexture = SKTexture(imageNamed: imageName)
+        
+        for i in 0 ... 1 {
+            let background = SKSpriteNode(texture: backgroundTexture)
+            background.size = CGSize(width: frame.width, height: height)
+            background.zPosition = zPosition
+            background.anchorPoint = CGPoint.zero
+            background.position = CGPoint(x: 0, y: (height * CGFloat(i)) - CGFloat(1 * i))
+            
+            self.addChild(background)
+            
+            let moveDown = SKAction.moveBy(x: 0, y: -height, duration: duration)
+            let moveReset = SKAction.moveBy(x: 0, y: height, duration: 0)
+            let moveLoop = SKAction.sequence([moveDown, moveReset])
+            let moveForever = SKAction.repeatForever(moveLoop)
+            
+            background.run(moveForever)
+        }
+    }
+    
+    //MARK: - Exit Scene Animations
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         
-        
         goToGameScene()
-//        if !messageNode.children.isEmpty {
-//            checkNotificationTouch(at: touches.first!)
-//            return
-//        }
-//
-//
-//        let touch = touches.first!
-//        let location = touch.location(in: self)
-//
-//        let label = menuNode.childNode(withName: "change player")
-//        let arrow = menuNode.childNode(withName: "arrow-down")
-//
-//        if label?.frame.contains(location) ?? false || arrow?.frame.contains(location) ?? false {
-//            goToCharacterSelect()
-//        } else {
-//            performExitAnimation(AndGoTo: .gameScene)
-//        }
         
     }
     
@@ -238,132 +253,6 @@ class MenuScene: SKScene {
         let gameScene = GameScene(size: self.view!.bounds.size)
         self.view!.presentScene(gameScene)
     }
-    
-//    func goToCharacterSelect() {
-//        let characterSelect = ChangePlayer(size: self.view!.bounds.size)
-//        let transition = SKTransition.moveIn(with: .down, duration: 0.3)
-//        self.view!.presentScene(characterSelect, transition: transition)
-//    }
-    
-    
-    
-//    //MARK: - Daily Score Handler
-//    func checkForNewDay() {
-//
-////        createNotification(withMessage: "Daily Hi Score Reset!")
-////        return
-//
-//        if UserDefaults.standard.object(forKey: "LastDateSaved") == nil {
-//            UserDefaults.standard.set(Date(), forKey: "LastDateSaved")
-//            return
-//        }
-//
-//        let lastDate = UserDefaults.standard.object(forKey: "LastDateSaved") as! Date
-//        let todaysDate = Date()
-//
-//        if !isSameDay(date1: lastDate, date2: todaysDate) {
-//            UserDefaults.standard.set(0, forKey: "Highscore")
-//
-//            let highScoreLabel = menuNode.childNode(withName: "high score label") as? SKLabelNode
-//            highScoreLabel?.text = "Highscore: 0"
-//
-//            UserDefaults.standard.set(Date(), forKey: "LastDateSaved")
-//            createNotification(withMessage: "New Day, New Hi Score!")
-//        }
-//
-//    }
-//
-//    func isSameDay(date1: Date, date2: Date) -> Bool {
-//        let diff = Calendar.current.dateComponents([.day], from: date1, to: date2)
-//        if diff.day == 0 {
-//            return true
-//        } else {
-//            return false
-//        }
-//    }
-//
-//    func createNotification(withMessage message: String) {
-//        dimScreen()
-//        let frameSize = CGSize(width: self.frame.width * 0.8, height: self.frame.height * 0.5)
-//        let framePos = CGPoint(x: self.frame.midX - (frameSize.width/2), y: (self.frame.midY - (self.frame.midY * 0.2)) - (frameSize.height/2))
-//        let messageFrame = SKShapeNode(rect: CGRect(origin: framePos, size: frameSize), cornerRadius: 20)
-//        messageFrame.fillColor = self.backgroundColor
-//        messageFrame.alpha = 1
-////        let messageFrame = SKSpriteNode(color: .blue, size: frameSize)
-//        messageFrame.name = "message frame"
-//        messageNode.addChild(messageFrame)
-//
-//        let third = messageFrame.frame.size.height * 0.3
-//
-//        //used to find the true center, not the lower left corner that the origin points to
-//        let messageFrameCenter = CGPoint(x: messageFrame.frame.origin.x + (messageFrame.frame.width/2), y: messageFrame.frame.origin.y + (messageFrame.frame.height/2))
-//
-//        let titleMessage = SKLabelNode(text: message)
-//        titleMessage.position = CGPoint(x: messageFrameCenter.x, y: messageFrameCenter.y + third)
-//        titleMessage.fontName = "AvenirNext-Bold"
-//        titleMessage.fontSize = 30.0
-//        titleMessage.fontColor = UIColor.white
-//        titleMessage.numberOfLines = 0
-//        titleMessage.verticalAlignmentMode = .top
-//        titleMessage.horizontalAlignmentMode = .center
-//        titleMessage.lineBreakMode = .byWordWrapping
-//        titleMessage.preferredMaxLayoutWidth = messageFrame.frame.size.width - 70
-//
-//        let attrString = NSMutableAttributedString(string: message)
-//        let paragraphStyle = NSMutableParagraphStyle()
-//        paragraphStyle.alignment = .center
-//        let range = NSRange(location: 0, length: message.count)
-//        attrString.addAttribute(NSAttributedStringKey.paragraphStyle, value: paragraphStyle, range: range)
-//        attrString.addAttributes([NSAttributedStringKey.foregroundColor : UIColor.white, NSAttributedStringKey.font : UIFont.systemFont(ofSize: 30)], range: range)
-//        titleMessage.attributedText = attrString
-//
-//        messageNode.addChild(titleMessage)
-//
-//        let buttonWidth = messageFrame.frame.size.width * 0.5
-//        let button = SKShapeNode(rect: CGRect(x: messageFrameCenter.x - (buttonWidth/2), y: messageFrameCenter.y - third, width: buttonWidth, height: 50), cornerRadius: 30)
-//        button.fillColor = UIColor.red
-//        button.lineWidth = 0
-//        button.name = "notification button"
-//        messageNode.addChild(button)
-//
-//        let buttonLabel = SKLabelNode(text: "OK")
-//        buttonLabel.name = "button label"
-//        buttonLabel.fontName = "AvenirNext"
-//        buttonLabel.fontSize = 20
-//        buttonLabel.color = UIColor.white
-//        buttonLabel.colorBlendFactor = 1
-//        buttonLabel.position = CGPoint(x: messageFrameCenter.x, y: (messageFrameCenter.y - third) + (button.frame.height / 2))
-//        buttonLabel.verticalAlignmentMode = .center
-//        messageNode.addChild(buttonLabel)
-//    }
-//
-//    func dimScreen() {
-//        dimPanel = SKSpriteNode(color: UIColor.black, size: self.size)
-//        dimPanel!.alpha = 0.5
-//        dimPanel!.position = CGPoint(x: self.size.width/2, y: self.size.height/2)
-//        messageNode.addChild(dimPanel!)
-//    }
-//
-//    func removeDimScreen() {
-//        dimPanel?.removeFromParent()
-//        dimPanel = nil
-//    }
-//
-//    func checkNotificationTouch(at touch: UITouch) {
-//
-//        let location = touch.location(in: self)
-//
-//        let button = messageNode.childNode(withName: "notification button")
-//        let messageFrame = messageNode.childNode(withName: "message frame")
-//
-//        if button?.frame.contains(location) ?? false {
-//            messageNode.removeAllChildren()
-//        } else if !(messageFrame?.frame.contains(location) ?? true) {
-//            messageNode.removeAllChildren()
-//        }
-//
-//
-//    }
     
 }
 

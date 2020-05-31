@@ -12,12 +12,14 @@ class BoxSet : SKNode {
     
     private var screenSize : CGFloat
     var speedMultiplier : CGFloat = 1
-    private var moveBoxDuration : CGFloat = 5
+    var moveBoxDuration : CGFloat = 5
     var center : CGPoint
-    var pos = 0
+
     private var boxArray : [SKSpriteNode] = []
     private var shooterBoxArray : [SKSpriteNode] = []
-    var boxesRemoved = 0
+    
+    private var boxesDeployed = 3
+    private var invisibleBoxesDeployed = 0
     
     private var pos3 = CGPoint()
     private var pos2 = CGPoint()
@@ -27,9 +29,13 @@ class BoxSet : SKNode {
     private var pos4 = CGPoint()
     private var pos5 = CGPoint()
     private var pos6 = CGPoint()
-    private var nodeRemovalPos = CGPoint()
 
     private var boxHeightAndWidth : CGFloat
+    
+    convenience init(height: CGFloat, position: CGPoint, moveBoxDuration: CGFloat) {
+        self.init(height: height, position: position)
+        self.moveBoxDuration = moveBoxDuration
+    }
     
     init(height: CGFloat, position: CGPoint) {
         screenSize = height
@@ -44,7 +50,7 @@ class BoxSet : SKNode {
     }
     
     private func addBoxes() {
-        let boxSpacing = (0.2 * screenSize)/7
+        let boxSpacing = (0.2 * screenSize) / 7
         let halfBoxSpacing = boxSpacing / 2
         let halfBoxHeight = boxHeightAndWidth / 2
         
@@ -58,7 +64,6 @@ class BoxSet : SKNode {
         pos4 = CGPoint(x: center.x, y: center.y - halfBoxSpacing - halfBoxHeight)
         pos5 = CGPoint(x: center.x, y: pos4.y - boxHeightAndWidth - boxSpacing)
         pos6 = CGPoint(x: center.x, y: pos5.y - boxHeightAndWidth - boxSpacing)
-        nodeRemovalPos = CGPoint(x: center.x, y: pos6.y - boxHeightAndWidth - boxSpacing - (boxHeightAndWidth/2))
         
 //        let boxPositions : [CGPoint] = [pos0, pos1, pos2, pos3, pos4, pos5, pos6]
         let boxPositions : [CGPoint] = [pos6, pos5, pos4, pos3, pos2, pos1, pos0]
@@ -86,8 +91,8 @@ class BoxSet : SKNode {
     
     func createNewBox() {
         
-        let randNum = arc4random_uniform(UInt32(6))
-        if randNum <= 1 {
+        let shouldMakeBox = decideToMakeBox()
+        if shouldMakeBox == false {
             createEmptySpace(atPoint: pos0)
             return
         }
@@ -100,6 +105,33 @@ class BoxSet : SKNode {
         
         let moveBox = SKAction.moveBy(x: 0, y: -totalDistance - 10, duration: Double(moveBoxDuration))
         box.run(moveBox,withKey: "move")
+    }
+    
+    private func decideToMakeBox() -> Bool {
+        
+        //check for limits
+        if boxesDeployed >= 3 {
+            boxesDeployed = 0
+            invisibleBoxesDeployed += 1
+            return false
+        } else if invisibleBoxesDeployed >= 3 {
+            invisibleBoxesDeployed = 0
+            boxesDeployed += 1
+            return true
+        }
+        
+        //if not at any limit, choose randomly
+        let randNum = arc4random_uniform(UInt32(6))
+        if randNum <= 1 {
+            boxesDeployed = 0
+            invisibleBoxesDeployed += 1
+            return false
+        } else {
+            invisibleBoxesDeployed = 0
+            boxesDeployed += 1
+            return true
+        }
+        
     }
     
     func makeBoxesDynamic() {
@@ -116,12 +148,9 @@ class BoxSet : SKNode {
             box.removeAction(forKey: "move")
         }
         beginMovingBoxes()
-        
     }
     
-    private func decideToMakeBox() {
-        
-    }
+
     
     //call to create empty spaces so that the user can shoot thier box into
     
@@ -196,13 +225,11 @@ class BoxSet : SKNode {
         if lastBox.position.y <= yRemovalPos {
             lastBox.removeFromParent()
             boxArray.remove(at: 0)
-            boxesRemoved += 1
-            print("boxes removed: \(boxesRemoved)")
         }
         
         if shooterBoxArray.count == 0 {return}
         let lastShooterBox = shooterBoxArray[0]
-        if lastShooterBox.position.y <= nodeRemovalPos.y {
+        if lastShooterBox.position.y <= yRemovalPos {
             lastShooterBox.removeFromParent()
             shooterBoxArray.remove(at: 0)
         }
