@@ -12,11 +12,12 @@ class BoxSet : SKNode {
     
     private var screenSize : CGFloat
     var speedMultiplier : CGFloat = 1
-    var moveBoxDuration : CGFloat = 5
+    var moveBoxDuration : CGFloat = 3.5
     var center : CGPoint
 
     private var boxArray : [SKSpriteNode] = []
     private var shooterBoxArray : [SKSpriteNode] = []
+    private var boxHolderArray : [SKSpriteNode] = []
     
     private var boxesDeployed = 3
     private var invisibleBoxesDeployed = 0
@@ -49,13 +50,13 @@ class BoxSet : SKNode {
         fatalError("init(coder:) has not been implemented")
     }
     
+    //MARK: - Initial Functions
+    
     private func addBoxes() {
         let boxSpacing = (0.2 * screenSize) / 7
         let halfBoxSpacing = boxSpacing / 2
         let halfBoxHeight = boxHeightAndWidth / 2
-        
-        //added an offset downward since the bottom has no space and the top does
-        
+                
         pos3 = CGPoint(x: center.x, y: center.y + halfBoxSpacing + halfBoxHeight)
         pos2 = CGPoint(x: center.x, y: pos3.y + boxHeightAndWidth + boxSpacing)
         pos1 = CGPoint(x: center.x, y: pos2.y + boxHeightAndWidth + boxSpacing)
@@ -65,7 +66,6 @@ class BoxSet : SKNode {
         pos5 = CGPoint(x: center.x, y: pos4.y - boxHeightAndWidth - boxSpacing)
         pos6 = CGPoint(x: center.x, y: pos5.y - boxHeightAndWidth - boxSpacing)
         
-//        let boxPositions : [CGPoint] = [pos0, pos1, pos2, pos3, pos4, pos5, pos6]
         let boxPositions : [CGPoint] = [pos6, pos5, pos4, pos3, pos2, pos1, pos0]
         
         for position in boxPositions {
@@ -73,6 +73,10 @@ class BoxSet : SKNode {
             let box = createBox(AtPos: position, andSize: CGSize(width: boxHeightAndWidth, height: boxHeightAndWidth))
             self.addChild(box)
             boxArray.append(box)
+            
+            let boxHolder = createHolder(atPos: position)
+            self.addChild(boxHolder)
+            boxHolderArray.append(boxHolder)
         }
         
         beginMovingBoxes()
@@ -81,13 +85,13 @@ class BoxSet : SKNode {
     
     private func beginMovingBoxes() {
         let totalDistance = screenSize + boxHeightAndWidth
-        
         for box in self.children {
             let moveBox = SKAction.moveBy(x: 0, y: -totalDistance - 10, duration: Double(moveBoxDuration))
             box.run(moveBox,withKey: "move")
-            
         }
     }
+    
+    //MARK: - Create Boxes
     
     func createNewBox() {
         
@@ -103,8 +107,43 @@ class BoxSet : SKNode {
         self.addChild(box)
         boxArray.append(box)
         
+        let boxHolder = createHolder(atPos: pos0)
+        self.addChild(boxHolder)
+        boxHolderArray.append(boxHolder)
+        
         let moveBox = SKAction.moveBy(x: 0, y: -totalDistance - 10, duration: Double(moveBoxDuration))
         box.run(moveBox,withKey: "move")
+        boxHolder.run(moveBox,withKey: "move")
+    }
+    
+    private func createBox(AtPos pos: CGPoint,andSize boxSize: CGSize) -> SKSpriteNode {
+        let box = Box(size: boxSize)
+        box.position = pos
+        
+        return box
+    }
+    
+    //call to create empty spaces so that the user can shoot thier box into
+    private func createEmptySpace(atPoint point: CGPoint) {
+        let totalDistance = screenSize + boxHeightAndWidth
+        
+        let invisibleBox = InvisibleBox(size: CGSize(width: boxHeightAndWidth, height: 1))
+        invisibleBox.position = pos0
+        self.addChild(invisibleBox)
+        boxArray.append(invisibleBox)
+        
+        let moveBox = SKAction.moveBy(x: 0, y: -totalDistance - 10, duration: Double(moveBoxDuration))
+        invisibleBox.run(moveBox,withKey: "move")
+    }
+    
+    private func createHolder(atPos pos: CGPoint) -> SKSpriteNode {
+        let distanceLeftOfBoxes = center.x - self.frame.minX
+        let holderXPos = center.x - ((distanceLeftOfBoxes * 0.05) / 2)
+        let holderSize = CGSize(width: boxHeightAndWidth * 0.2, height: boxHeightAndWidth * 0.6)
+        let boxHolder = SKSpriteNode(texture: SKTexture(imageNamed: "Box-Holder"), size: holderSize)
+        boxHolder.position = CGPoint(x: holderXPos, y: pos.y)
+        boxHolder.zPosition = -10
+        return boxHolder
     }
     
     private func decideToMakeBox() -> Bool {
@@ -134,38 +173,6 @@ class BoxSet : SKNode {
         
     }
     
-    func makeBoxesDynamic() {
-        for box in self.children {
-            box.physicsBody?.isDynamic = true
-        }
-    }
-    
-    func speedUpBoxes() {
-        if moveBoxDuration == 2 {return}
-        moveBoxDuration -= 0.05
-        
-        for box in children {
-            box.removeAction(forKey: "move")
-        }
-        beginMovingBoxes()
-    }
-    
-
-    
-    //call to create empty spaces so that the user can shoot thier box into
-    
-    private func createEmptySpace(atPoint point: CGPoint) {
-        let totalDistance = screenSize + boxHeightAndWidth
-        
-        let invisibleBox = InvisibleBox(size: CGSize(width: boxHeightAndWidth, height: 1))
-        invisibleBox.position = pos0
-        self.addChild(invisibleBox)
-        boxArray.append(invisibleBox)
-        
-        let moveBox = SKAction.moveBy(x: 0, y: -totalDistance - 10, duration: Double(moveBoxDuration))
-        invisibleBox.run(moveBox,withKey: "move")
-    }
-    
     private func calculateDuration() -> CGFloat {
         let totalDistance = screenSize + boxHeightAndWidth + 10
 //        let yEndPoint = center.y - (totalDistance/2)
@@ -180,19 +187,9 @@ class BoxSet : SKNode {
         addBoxes()
     }
     
-    func addShooterBoxToLine(atYPos yPos: CGFloat) {
-        let box = createBox(AtPos: CGPoint(x: center.x, y: yPos), andSize: CGSize(width: boxHeightAndWidth, height: boxHeightAndWidth))
-        self.addChild(box)
-        shooterBoxArray.append(box)
-        
-        let totalDistance = screenSize + boxHeightAndWidth
-        
-        let moveBox = SKAction.moveBy(x: 0, y: -totalDistance - 10, duration: Double(moveBoxDuration))
-        box.run(moveBox,withKey: "move")
-        
-        wobble(box: box)
-        
-    }
+
+    
+    //MARK: - Animations
     
     private func wobble(box: SKSpriteNode) {
         box.anchorPoint = CGPoint(x: 0, y: 0.5)
@@ -206,32 +203,45 @@ class BoxSet : SKNode {
         box.run(sequence)
     }
     
-    private func createBox(AtPos pos: CGPoint,andSize boxSize: CGSize) -> SKSpriteNode {
-        let box = Box(size: boxSize)
-        box.position = pos
-    
-        return box
+    private func makeShine(box: SKSpriteNode) {
+        let shineColor = UIColor(red: 255/255, green: 215/255, blue: 0/255, alpha: 1)
+        let changeColor = SKAction.colorize(with: shineColor, colorBlendFactor: 1, duration: 0)
+        let lowerShine = SKAction.colorize(withColorBlendFactor: 0, duration: 1)
+        let sequence = SKAction.sequence([changeColor,lowerShine])
+        
+        box.run(sequence)
     }
+    
+    
+    //MARK: - Check Box Positions
     
     func checkPosOfLastBox() {
         
         let totalDistance = screenSize + boxHeightAndWidth
         let yRemovalPos = pos0.y - totalDistance - 5
         
-        if boxArray.count == 0 {return}
-        let lastBox = boxArray[0]
-//        print("Last box position: \(lastBox.position.y)")
-//        print("Node removal position: \(nodeRemovalPos.y)")
-        if lastBox.position.y <= yRemovalPos {
-            lastBox.removeFromParent()
-            boxArray.remove(at: 0)
+        if boxArray.count != 0 {
+            let lastBox = boxArray[0]
+            if lastBox.position.y <= yRemovalPos {
+                lastBox.removeFromParent()
+                boxArray.remove(at: 0)
+            }
         }
         
-        if shooterBoxArray.count == 0 {return}
-        let lastShooterBox = shooterBoxArray[0]
-        if lastShooterBox.position.y <= yRemovalPos {
-            lastShooterBox.removeFromParent()
-            shooterBoxArray.remove(at: 0)
+        if shooterBoxArray.count != 0 {
+            let lastShooterBox = shooterBoxArray[0]
+            if lastShooterBox.position.y <= yRemovalPos {
+                lastShooterBox.removeFromParent()
+                shooterBoxArray.remove(at: 0)
+            }
+        }
+        
+        if boxHolderArray.count != 0 {
+            let lastBoxHolder = boxHolderArray[0]
+            if lastBoxHolder.position.y <= yRemovalPos {
+                lastBoxHolder.removeFromParent()
+                boxHolderArray.remove(at: 0)
+            }
         }
     }
     
@@ -243,6 +253,47 @@ class BoxSet : SKNode {
             createNewBox()
             firstBox.hasBeenChecked = true
         }
+    }
+    
+    //MARK: - Adding Shooter Box
+    
+    func addShooterBoxToLine(atYPos yPos: CGFloat) {
+        let box = createBox(AtPos: CGPoint(x: center.x, y: yPos), andSize: CGSize(width: boxHeightAndWidth, height: boxHeightAndWidth))
+        self.addChild(box)
+        shooterBoxArray.append(box)
+        
+        let boxHolder = createHolder(atPos: CGPoint(x: center.x, y: yPos))
+        self.addChild(boxHolder)
+        boxHolderArray.append(boxHolder)
+        
+        let totalDistance = screenSize + boxHeightAndWidth
+        
+        let moveBox = SKAction.moveBy(x: 0, y: -totalDistance - 10, duration: Double(moveBoxDuration))
+        box.run(moveBox,withKey: "move")
+        
+        wobble(box: box)
+    }
+    
+    func makeBoxesDynamic() {
+        for box in self.children {
+            box.physicsBody?.isDynamic = true
+        }
+    }
+    
+    func makeBoxesNotDynamic() {
+        for box in self.children {
+            box.physicsBody?.isDynamic = false
+        }
+    }
+    
+    func speedUpBoxes() {
+        if moveBoxDuration == 3 {return}
+        moveBoxDuration -= 0.01
+        
+        for box in children {
+            box.removeAction(forKey: "move")
+        }
+        beginMovingBoxes()
     }
     
 }

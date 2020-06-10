@@ -37,5 +37,4 @@ class Box : SKSpriteNode {
         self.zPosition = 0
     }
     
-    
 }
