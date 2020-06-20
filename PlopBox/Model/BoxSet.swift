@@ -6,18 +6,25 @@
 //  Copyright © 2020 Juan Erenas. All rights reserved.
 //
 
+protocol BoxSetDelegate : class {
+    func missedTarget()
+    func targetHitWith(precisionRating: PrecisionRating)
+}
+
 import SpriteKit
 
 class BoxSet : SKNode {
     
     private var screenSize : CGFloat
     var speedMultiplier : CGFloat = 1
-    var moveBoxDuration : CGFloat = 3.5
+    var moveBoxDuration : CGFloat = 4
+    private var shootPoint : CGPoint
     var center : CGPoint
 
     private var boxArray : [SKSpriteNode] = []
     private var shooterBoxArray : [SKSpriteNode] = []
     private var boxHolderArray : [SKSpriteNode] = []
+    private var invisibleBoxArray : [InvisibleBox] = []
     
     private var boxesDeployed = 3
     private var invisibleBoxesDeployed = 0
@@ -32,16 +39,22 @@ class BoxSet : SKNode {
     private var pos6 = CGPoint()
 
     private var boxHeightAndWidth : CGFloat
+    private var boxSpacing : CGFloat
     
-    convenience init(height: CGFloat, position: CGPoint, moveBoxDuration: CGFloat) {
-        self.init(height: height, position: position)
+    weak var delegate : BoxSetDelegate?
+    
+    convenience init(height: CGFloat, position: CGPoint, moveBoxDuration: CGFloat,shootPoint: CGPoint) {
+        self.init(height: height, position: position,shootPoint: shootPoint)
+        self.shootPoint = shootPoint
         self.moveBoxDuration = moveBoxDuration
     }
     
-    init(height: CGFloat, position: CGPoint) {
+    init(height: CGFloat, position: CGPoint,shootPoint: CGPoint) {
         screenSize = height
         center = position
+        self.shootPoint = shootPoint
         boxHeightAndWidth = (0.8 * screenSize)/6
+        boxSpacing = (0.2 * screenSize) / 7
         super.init()
         addBoxes()
     }
@@ -53,7 +66,6 @@ class BoxSet : SKNode {
     //MARK: - Initial Functions
     
     private func addBoxes() {
-        let boxSpacing = (0.2 * screenSize) / 7
         let halfBoxSpacing = boxSpacing / 2
         let halfBoxHeight = boxHeightAndWidth / 2
                 
@@ -125,12 +137,25 @@ class BoxSet : SKNode {
     
     //call to create empty spaces so that the user can shoot thier box into
     private func createEmptySpace(atPoint point: CGPoint) {
+        var alreadyContainsEmptySpace = false
+        for box in boxArray {
+            if box.name == "invisible box" {
+                alreadyContainsEmptySpace = true
+                break
+            }
+        }
+        
         let totalDistance = screenSize + boxHeightAndWidth
         
-        let invisibleBox = InvisibleBox(size: CGSize(width: boxHeightAndWidth, height: 1))
+        let invisibleBox = InvisibleBox(size: CGSize(width: boxHeightAndWidth, height: boxHeightAndWidth))
         invisibleBox.position = pos0
+        
+        if alreadyContainsEmptySpace == false {
+            invisibleBox.createTarget()
+        }
         self.addChild(invisibleBox)
         boxArray.append(invisibleBox)
+        invisibleBoxArray.append(invisibleBox)
         
         let moveBox = SKAction.moveBy(x: 0, y: -totalDistance - 10, duration: Double(moveBoxDuration))
         invisibleBox.run(moveBox,withKey: "move")
@@ -220,9 +245,20 @@ class BoxSet : SKNode {
         let totalDistance = screenSize + boxHeightAndWidth
         let yRemovalPos = pos0.y - totalDistance - 5
         
+        if invisibleBoxArray.count != 0 {
+            let lastBox = invisibleBoxArray[0]
+            let pointBeyondTarget = CGPoint(x: shootPoint.x, y: shootPoint.y - boxHeightAndWidth)
+            if lastBox.position.y <= pointBeyondTarget.y {
+//                invisibleBoxArray.remove(at: 0)
+                endGame(forInvisibleBox: lastBox)
+                delegate?.missedTarget()
+            }
+        }
+        
         if boxArray.count != 0 {
             let lastBox = boxArray[0]
             if lastBox.position.y <= yRemovalPos {
+                
                 lastBox.removeFromParent()
                 boxArray.remove(at: 0)
             }
@@ -236,6 +272,7 @@ class BoxSet : SKNode {
             }
         }
         
+        //this is for the things that hold the box
         if boxHolderArray.count != 0 {
             let lastBoxHolder = boxHolderArray[0]
             if lastBoxHolder.position.y <= yRemovalPos {
@@ -255,9 +292,20 @@ class BoxSet : SKNode {
         }
     }
     
+    //MARK: - Ending Game
+    
+    private func endGame(forInvisibleBox invisibleBox: InvisibleBox) {
+        invisibleBox.turnRed()
+    }
+    
+    
     //MARK: - Adding Shooter Box
     
     func addShooterBoxToLine(atYPos yPos: CGFloat) {
+        //Check accuracy
+        checkAccuracyForShotAt(boxYPos: yPos)
+        
+        //Creat Box
         let box = createBox(AtPos: CGPoint(x: center.x, y: yPos), andSize: CGSize(width: boxHeightAndWidth, height: boxHeightAndWidth))
         self.addChild(box)
         shooterBoxArray.append(box)
@@ -272,6 +320,35 @@ class BoxSet : SKNode {
         box.run(moveBox,withKey: "move")
         
         wobble(box: box)
+    }
+    
+    private func checkAccuracyForShotAt(boxYPos: CGFloat) {
+        //add code to check accuracy and deal with it
+        let targetInvisibleBox = invisibleBoxArray[0]
+        let distanceToTarget = abs(targetInvisibleBox.position.y - boxYPos)
+        
+        let distanceCutOffPoint = (boxHeightAndWidth / 2) + (boxSpacing * 2)
+        if distanceToTarget >= distanceCutOffPoint {
+            endGame(forInvisibleBox: targetInvisibleBox)
+            delegate?.missedTarget()
+            return
+        }
+        
+        if distanceToTarget <= boxHeightAndWidth / 20 {
+            delegate?.targetHitWith(precisionRating: .perfect)
+            
+        } else if distanceToTarget <= boxHeightAndWidth / 10 {
+            delegate?.targetHitWith(precisionRating: .awesome)
+        } else {
+            delegate?.targetHitWith(precisionRating: .good)
+        }
+            
+        targetInvisibleBox.removeTarget()
+        invisibleBoxArray.remove(at: 0)
+        if invisibleBoxArray.count == 0 {return}
+        let newTarget = invisibleBoxArray[0]
+        newTarget.createTarget()
+        
     }
     
     func makeBoxesDynamic() {

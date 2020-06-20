@@ -26,6 +26,7 @@ class Box : SKSpriteNode {
         let size = CGSize(width: self.size.width , height: self.size.height)
         
         self.anchorPoint = CGPoint(x: 0, y: 0.5)
+        let center = CGPoint(x: self.position.x + self.size.width/2, y: self.position.y)
         self.physicsBody = SKPhysicsBody(rectangleOf: size)
         self.physicsBody?.categoryBitMask = PhysicsCategories.boxCategory
         self.physicsBody?.contactTestBitMask = PhysicsCategories.shooterCategory

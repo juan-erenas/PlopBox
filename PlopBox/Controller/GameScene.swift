@@ -42,7 +42,6 @@ class GameScene: SKScene {
         
         addConveyorBelt()
         
-        
         backgroundColor = .white
         
         tap = UITapGestureRecognizer(target: self, action: #selector(shootBox))
@@ -52,14 +51,12 @@ class GameScene: SKScene {
         physicsWorld.contactDelegate = self
         physicsWorld.gravity = .zero
         
-        
-        
         if gameRestarted {
             restartGame()
         }
-        
-
     }
+    
+    //MARK: - Scene Setup
     
     func restartGame() {
         //insert code for restarting game after game over
@@ -108,10 +105,11 @@ class GameScene: SKScene {
     }
     
     func addBoxSet() {
-        
         let xPos = self.frame.minX + shootingBox.size.width - shootingBox.size.width/2
-        boxSet = BoxSet(height: self.frame.height, position: CGPoint(x: xPos, y: self.frame.midY))
+        let shootPoint = CGPoint(x: xPos, y: shootingBox.position.y)
+        boxSet = BoxSet(height: self.frame.height, position: CGPoint(x: xPos, y: self.frame.midY),shootPoint: shootPoint)
         leftNode.addChild(boxSet)
+        boxSet.delegate = self
     }
     
     func addShootingBox() {
@@ -204,6 +202,9 @@ class GameScene: SKScene {
         belt.position = pos
         leftNode.addChild(belt)
     }
+    
+    
+    //MARK: - Shoot Box Handler
     
     @objc func shootBox() {
         
@@ -299,21 +300,10 @@ class GameScene: SKScene {
     }
     
     // MARK: - Game Over Handler
-    func endGame() {
+    func endGame(withWait shouldWait: Bool) {
         
         gameActive = false
-        physicsWorld.gravity = CGVector(dx: 0.0, dy: -9.8)
-        shakeCamera(layer: worldNode, duration: 0.3)
-        
-        for box in boxSet.children {
-            box.physicsBody?.isDynamic = true
-            box.physicsBody?.allowsRotation = true
-            box.removeAllActions()
-        }
-        
-        shootingBox.removeAllActions()
-        shootingBox.physicsBody?.isDynamic = true
-        shootingBox.physicsBody?.allowsRotation = true
+
         
         view?.removeGestureRecognizer(tap)
         
@@ -328,7 +318,16 @@ class GameScene: SKScene {
                 gameOverScene.moveBoxDuration = self.boxSet.moveBoxDuration
                 self.view!.presentScene(gameOverScene)
             }
-            let sequence = SKAction.sequence([wait,goToGameOverScene])
+            
+            //only run "wait" if shouldWait is true
+            var sequence = SKAction()
+            if shouldWait {
+                sequence = SKAction.sequence([wait,goToGameOverScene])
+            } else {
+                sequence = SKAction.sequence([goToGameOverScene])
+            }
+            
+            
             self.run(sequence)
             
         } else {
@@ -340,6 +339,21 @@ class GameScene: SKScene {
             let sequence = SKAction.sequence([wait,goToMainMenu])
             self.run(sequence)
         }
+    }
+    
+    func makeBoxesFall() {
+        physicsWorld.gravity = CGVector(dx: 0.0, dy: -9.8)
+        shakeCamera(layer: worldNode, duration: 0.3)
+        
+        for box in boxSet.children {
+            box.physicsBody?.isDynamic = true
+            box.physicsBody?.allowsRotation = true
+            box.removeAllActions()
+        }
+        
+        shootingBox.removeAllActions()
+        shootingBox.physicsBody?.isDynamic = true
+        shootingBox.physicsBody?.allowsRotation = true
     }
     
     override func update(_ currentTime: TimeInterval) {
@@ -356,11 +370,36 @@ extension GameScene: SKPhysicsContactDelegate {
         
 //        guard let bodyAName = contact.bodyA.node?.name else {return}
 //        guard let bodyBName = contact.bodyB.node?.name else {return}
-        
+        makeBoxesFall()
+        endGame(withWait: true)
 
-        endGame()
-        
+    }
+    
+}
 
+
+
+extension GameScene : BoxSetDelegate {
+    func missedTarget() {
+        let duration = Double(boxSet.moveBoxDuration / 6)
+        let slowWorld = SKAction.speed(to: 0, duration: duration)
+        let endTheGame = SKAction.customAction(withDuration: 0) { (_, _) in
+            self.endGame(withWait: false)
+        }
+        let sequence = SKAction.sequence([slowWorld,endTheGame])
+        worldNode.run(sequence)
+        
+    }
+    
+    func targetHitWith(precisionRating: PrecisionRating) {
+        let precisionLabelPanel = PrecisionLabelPanel(size: self.frame.size, precisionRating: precisionRating, animationDuration: Double(boxSet.moveBoxDuration / 6))
+        precisionLabelPanel.position = CGPoint(x: self.frame.midX, y: self.frame.midY)
+        worldNode.addChild(precisionLabelPanel)
+        
+//        let precisionLabel = PrecisionRatingLabel(precisionRating: precisionRating, fontSize: 40, withDuration: Double(boxSet.moveBoxDuration / 6))
+//        precisionLabel.position = CGPoint(x: self.frame.midX, y: self.frame.midY + self.size.height / 4)
+//        worldNode.addChild(precisionLabel)
+//        precisionLabel.runAnimation()
     }
     
 }

@@ -7,7 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4422393024958D5F0057EE42 /* PrecisionRating.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4422392F24958D5F0057EE42 /* PrecisionRating.swift */; };
 		443AA279248312F3005A9647 /* Marsh-Stencil.otf in Resources */ = {isa = PBXBuildFile; fileRef = 443AA278248312F2005A9647 /* Marsh-Stencil.otf */; };
+		444F964B249B386B001C205A /* PrecisionLabelPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 444F964A249B386B001C205A /* PrecisionLabelPanel.swift */; };
 		44558F59247F9BEF00CB85E5 /* GameOverScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44558F58247F9BEF00CB85E5 /* GameOverScene.swift */; };
 		445881F62489BE1F00D20646 /* ShopScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 445881F52489BE1F00D20646 /* ShopScene.swift */; };
 		4467EC6F2473634E00BDAA4D /* BoxSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4467EC6E2473634E00BDAA4D /* BoxSet.swift */; };
@@ -30,7 +32,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		4422392F24958D5F0057EE42 /* PrecisionRating.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrecisionRating.swift; sourceTree = "<group>"; };
 		443AA278248312F2005A9647 /* Marsh-Stencil.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Marsh-Stencil.otf"; sourceTree = "<group>"; };
+		444F964A249B386B001C205A /* PrecisionLabelPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrecisionLabelPanel.swift; sourceTree = "<group>"; };
 		44558F58247F9BEF00CB85E5 /* GameOverScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameOverScene.swift; sourceTree = "<group>"; };
 		445881F52489BE1F00D20646 /* ShopScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShopScene.swift; sourceTree = "<group>"; };
 		4467EC6E2473634E00BDAA4D /* BoxSet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoxSet.swift; sourceTree = "<group>"; };
@@ -136,6 +140,8 @@
 				44F92DEE247AEB960072096E /* BoxShooter.swift */,
 				4467EC7224736F2500BDAA4D /* Settings.swift */,
 				4467EC6E2473634E00BDAA4D /* BoxSet.swift */,
+				4422392F24958D5F0057EE42 /* PrecisionRating.swift */,
+				444F964A249B386B001C205A /* PrecisionLabelPanel.swift */,
 				44F3BAEB248C328D000A5CA4 /* shopBox.swift */,
 			);
 			path = Model;
@@ -216,6 +222,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				444F964B249B386B001C205A /* PrecisionLabelPanel.swift in Sources */,
 				4476260E24759F8700F636F7 /* ShooterBox.swift in Sources */,
 				44FECD422473209D00805D0F /* MenuScene.swift in Sources */,
 				44558F59247F9BEF00CB85E5 /* GameOverScene.swift in Sources */,
@@ -225,6 +232,7 @@
 				4467EC7124736C7000BDAA4D /* Box.swift in Sources */,
 				445881F62489BE1F00D20646 /* ShopScene.swift in Sources */,
 				4467EC7324736F2500BDAA4D /* Settings.swift in Sources */,
+				4422393024958D5F0057EE42 /* PrecisionRating.swift in Sources */,
 				4467EC6F2473634E00BDAA4D /* BoxSet.swift in Sources */,
 				44C31D0B247B426000C25149 /* InvisibleBox.swift in Sources */,
 				44F92DEF247AEB960072096E /* BoxShooter.swift in Sources */,
