@@ -7,6 +7,8 @@
 //
 
 import SpriteKit
+import AVFoundation
+import SwiftKeychainWrapper
 
 class GameScene: SKScene {
     
@@ -16,6 +18,8 @@ class GameScene: SKScene {
     var moveBoxDuration : CGFloat?
     private var tap = UITapGestureRecognizer()
     
+    private var player: AVAudioPlayer?
+    
     private var worldNode = SKNode()
     private var leftNode = SKNode()
     private var rightNode = SKNode()
@@ -23,24 +27,32 @@ class GameScene: SKScene {
     //used to prevent multiple contacts from calling game over
     private var gameActive = true
     var currentScore = 0
+    var currentMoney = 0
     var canRetry = true
+    
     private var scoreLabel : SKLabelNode?
+    private var moneyLabel : SKLabelNode!
     
     var gameRestarted = false
     
     override func didMove(to view: SKView) {
+        
         self.addChild(worldNode)
         addCoverScreen()
         worldNode.addChild(leftNode)
         worldNode.addChild(rightNode)
-        addIntroAnimation()
+        leftNode.isHidden = true
+        rightNode.isHidden = true
+
         createScoreLabel()
-        createCurrencyLabel()
+        createMoneyLabel()
         addShootingBox()
         addBoxShooter()
         addBoxSet()
+        createBackground()
         
         addConveyorBelt()
+        addIntroAnimation()
         
         backgroundColor = .white
         
@@ -74,11 +86,16 @@ class GameScene: SKScene {
         
         let duration = 0.5
         
+        let makeVisible = SKAction.customAction(withDuration: 0) { (_, _) in
+            self.leftNode.isHidden = false
+            self.rightNode.isHidden = false
+        }
+        
         //Right Node
         let moveRight = SKAction.moveTo(x: self.frame.maxX + self.frame.width / 2, duration: 0)
         let slowlyMoveLeft = SKAction.moveTo(x: self.frame.minX, duration: duration)
         slowlyMoveLeft.timingMode = .easeOut
-        let rightNodeSequence = SKAction.sequence([moveRight,slowlyMoveLeft])
+        let rightNodeSequence = SKAction.sequence([moveRight,makeVisible,slowlyMoveLeft])
         rightNode.run(rightNodeSequence)
         
         //Left Node
@@ -88,20 +105,56 @@ class GameScene: SKScene {
         let leftNodeSequence = SKAction.sequence([moveLeft,slowlyMoveRight])
         leftNode.run(leftNodeSequence)
         
+//        leftNode.isHidden = false
+//        rightNode.isHidden = false
+        
         //Score Label
         scoreLabel?.alpha = 0
         let appear = SKAction.fadeAlpha(to: 1, duration: duration)
         scoreLabel?.run(appear)
         
-        let remove = SKAction.removeFromParent()
-        coverScreen.run(remove)
+        let disappear = SKAction.fadeAlpha(to: 0, duration: duration * 3)
+        let removeFromParent = SKAction.removeFromParent()
+        let sequence = SKAction.sequence([disappear,removeFromParent])
+        coverScreen.run(sequence)
         
     }
     
     func addCoverScreen() {
         coverScreen = SKSpriteNode(color: .white, size: self.frame.size)
-        coverScreen.zPosition = 200
+        coverScreen.anchorPoint = CGPoint.zero
+        coverScreen.position = CGPoint(x: self.frame.minX, y: self.frame.minY)
+        coverScreen.zPosition = -100
         worldNode.addChild(coverScreen)
+    }
+    
+    func createBackground() {
+        //creates moving background for a parallax effect
+        createMovingBackground(withImageNamed: "front-background-boxes", height: frame.height, duration: 10,zPosition: -200,alpha: 1)
+        createMovingBackground(withImageNamed: "back-background-boxes", height: frame.height, duration: 30, zPosition: -300,alpha: 0.4)
+        
+    }
+    
+    func createMovingBackground(withImageNamed imageName: String,height: CGFloat,duration: Double, zPosition: CGFloat,alpha: CGFloat) {
+        let backgroundTexture = SKTexture(imageNamed: imageName)
+        
+        for i in 0 ... 1 {
+            let background = SKSpriteNode(texture: backgroundTexture)
+            background.alpha = alpha
+            background.size = CGSize(width: frame.width, height: height)
+            background.zPosition = zPosition
+            background.anchorPoint = CGPoint.zero
+            background.position = CGPoint(x: 0, y: (height * CGFloat(i)) - CGFloat(1 * i))
+            
+            worldNode.addChild(background)
+            
+            let moveDown = SKAction.moveBy(x: 0, y: -height, duration: duration)
+            let moveReset = SKAction.moveBy(x: 0, y: height, duration: 0)
+            let moveLoop = SKAction.sequence([moveDown, moveReset])
+            let moveForever = SKAction.repeatForever(moveLoop)
+            
+            background.run(moveForever)
+        }
     }
     
     func addBoxSet() {
@@ -113,7 +166,7 @@ class GameScene: SKScene {
     }
     
     func addShootingBox() {
-        let size = (0.8 * self.frame.height)/6
+        let size = (0.8 * self.frame.height) / 8
         
         let fourthOfWidth = self.frame.width/4
         let fourthOfHeight = self.frame.height/4
@@ -148,35 +201,28 @@ class GameScene: SKScene {
         worldNode.addChild(scoreLabel!)
     }
     
-    func createCurrencyLabel() {
+    func createMoneyLabel() {
         let coin = SKSpriteNode(imageNamed: "Coin")
         coin.size = CGSize(width: 30.0, height: 30.0)
         coin.position = CGPoint(x: frame.maxX - 30, y: frame.maxY - 30)
         worldNode.addChild(coin)
         
-        let currencyText = String(UserDefaults.standard.integer(forKey: "coins"))
-        let currency = SKLabelNode(text: currencyText)
-        currency.fontName = "AvenirNext-Bold"
-        currency.name = "change player"
-        currency.fontSize = 30.0
-        currency.color = UIColor(red: 80/255, green: 95/255, blue: 103/255, alpha: 1)
-        currency.colorBlendFactor = 1
-        currency.horizontalAlignmentMode = .right
-        currency.verticalAlignmentMode = .center
-        currency.position = CGPoint(x: coin.position.x - 20, y: coin.position.y)
-        worldNode.addChild(currency)
+        let currencyText = KeychainWrapper.standard.string(forKey: "coins")
+        currentMoney = Int(currencyText!) ?? 0
+        
+        moneyLabel = SKLabelNode(text: currencyText)
+        moneyLabel.fontName = "AvenirNext-Bold"
+        moneyLabel.name = "change player"
+        moneyLabel.fontSize = 30.0
+        moneyLabel.color = UIColor(red: 80/255, green: 95/255, blue: 103/255, alpha: 1)
+        moneyLabel.colorBlendFactor = 1
+        moneyLabel.horizontalAlignmentMode = .right
+        moneyLabel.verticalAlignmentMode = .center
+        moneyLabel.position = CGPoint(x: coin.position.x - 20, y: coin.position.y)
+        worldNode.addChild(moneyLabel)
     }
     
-    func addPointToScore() {
-        currentScore += 1
-        if let label = scoreLabel {
-            let scaleUp = SKAction.scale(to: 1.4, duration: 0.1)
-            let changeText = SKAction.customAction(withDuration: 0) { (_,_) in self.scoreLabel!.text = "\(self.currentScore)" }
-            let scaleDown = SKAction.scale(to: 1.0, duration: 0.1)
-            let sequence = SKAction.sequence([scaleUp,changeText,scaleDown])
-            label.run(sequence)
-        }
-    }
+
     
     func addConveyorBelt() {
         //insert code for conveyor belt
@@ -203,22 +249,48 @@ class GameScene: SKScene {
         leftNode.addChild(belt)
     }
     
+    //MARK: - Update Labels
+    
+    func addPointToScore() {
+        currentScore += 1
+        if let label = scoreLabel {
+            updateNumberFor(label: label, toNumber: "\(self.currentScore)")
+        }
+    }
+    
+    func addMoney() {
+        currentMoney += 1
+        if let label = moneyLabel {
+            updateNumberFor(label: label, toNumber: "\(currentMoney)")
+        }
+        //save the new amount to keychain
+        KeychainWrapper.standard.set("\(currentMoney)", forKey: "coins")
+    }
+    
+    func updateNumberFor(label: SKLabelNode,toNumber number: String) {
+        let scaleUp = SKAction.scale(to: 1.4, duration: 0.1)
+         let changeText = SKAction.customAction(withDuration: 0) { (_,_) in
+            label.text = number }
+         let scaleDown = SKAction.scale(to: 1.0, duration: 0.1)
+         let sequence = SKAction.sequence([scaleUp,changeText,scaleDown])
+         label.run(sequence)
+    }
+    
     
     //MARK: - Shoot Box Handler
     
     @objc func shootBox() {
-        
+        //box shooter needs a second to load the textures, and then it's ready
+        if boxShooter.readyToShoot == false {return}
+        //used to avoid shooting while already firing
         if shootingBox.currentlyShooting == true {return}
         
         boxShooter.shoot()
         shootingBox.removeAllActions()
         shootingBox.currentlyShooting = true
         
-        if willImpact() {
-            print("WILL IMPACT")
-            shootingBox.addPhysicsBody()
-            boxSet.makeBoxesDynamic()
-        }
+        shootingBox.addPhysicsBody()
+        boxSet.makeBoxesDynamic()
 
         let originalPosition = shootingBox.shootingPos
         let adjustedPosition = CGPoint(x: originalPosition.x + shootingBox.size.width/4, y: originalPosition.y)
@@ -239,10 +311,15 @@ class GameScene: SKScene {
             generator.impactOccurred()
             
         }
+        
         let comeOutOfBoxShooter = SKAction.moveTo(x: originalPosition.x, duration: 0.5)
         
         let sequence = SKAction.sequence([move, addToLineAndReset, comeOutOfBoxShooter])
         shootingBox.run(sequence)
+        
+        //Create Sound
+//        playSound(withName: "shoot-sound", andExtension: "mp3")
+//        playSound(withName: "woosh", andExtension: "mp3")
         
     }
     
@@ -299,6 +376,32 @@ class GameScene: SKScene {
         }
     }
     
+    // MARK: - Sound Handler
+
+    //doesn't work
+    func playSound(withName name: String, andExtension nameExtention: String) {
+        guard let url = Bundle.main.url(forResource: name, withExtension: nameExtention) else { return }
+
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
+            try AVAudioSession.sharedInstance().setActive(true)
+
+            /* The following line is required for the player to work on iOS 11. Change the file type accordingly*/
+            player = try AVAudioPlayer(contentsOf: url, fileTypeHint: AVFileType.mp3.rawValue)
+
+            /* iOS 10 and earlier require the following line:
+            player = try AVAudioPlayer(contentsOf: url, fileTypeHint: AVFileTypeMPEGLayer3) */
+
+            guard let player = player else { return }
+
+            player.play()
+
+        } catch let error {
+            print(error.localizedDescription)
+        }
+    }
+    
+    
     // MARK: - Game Over Handler
     func endGame(withWait shouldWait: Bool) {
         
@@ -326,7 +429,6 @@ class GameScene: SKScene {
             } else {
                 sequence = SKAction.sequence([goToGameOverScene])
             }
-            
             
             self.run(sequence)
             
@@ -395,6 +497,10 @@ extension GameScene : BoxSetDelegate {
         let precisionLabelPanel = PrecisionLabelPanel(size: self.frame.size, precisionRating: precisionRating, animationDuration: Double(boxSet.moveBoxDuration / 6))
         precisionLabelPanel.position = CGPoint(x: self.frame.midX, y: self.frame.midY)
         worldNode.addChild(precisionLabelPanel)
+        
+        if precisionRating == .perfect {
+            addMoney()
+        }
         
 //        let precisionLabel = PrecisionRatingLabel(precisionRating: precisionRating, fontSize: 40, withDuration: Double(boxSet.moveBoxDuration / 6))
 //        precisionLabel.position = CGPoint(x: self.frame.midX, y: self.frame.midY + self.size.height / 4)

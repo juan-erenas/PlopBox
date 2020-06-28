@@ -17,7 +17,7 @@ class BoxSet : SKNode {
     
     private var screenSize : CGFloat
     var speedMultiplier : CGFloat = 1
-    var moveBoxDuration : CGFloat = 4
+    var moveBoxDuration : CGFloat = 3.5
     private var shootPoint : CGPoint
     var center : CGPoint
 
@@ -29,14 +29,16 @@ class BoxSet : SKNode {
     private var boxesDeployed = 3
     private var invisibleBoxesDeployed = 0
     
+    private var pos4 = CGPoint()
     private var pos3 = CGPoint()
     private var pos2 = CGPoint()
     private var pos1 = CGPoint()
     private var pos0 = CGPoint()
     
-    private var pos4 = CGPoint()
     private var pos5 = CGPoint()
     private var pos6 = CGPoint()
+    private var pos7 = CGPoint()
+    private var pos8 = CGPoint()
 
     private var boxHeightAndWidth : CGFloat
     private var boxSpacing : CGFloat
@@ -53,8 +55,8 @@ class BoxSet : SKNode {
         screenSize = height
         center = position
         self.shootPoint = shootPoint
-        boxHeightAndWidth = (0.8 * screenSize)/6
-        boxSpacing = (0.2 * screenSize) / 7
+        boxHeightAndWidth = (0.85 * screenSize) / 8
+        boxSpacing = (0.15 * screenSize) / 9
         super.init()
         addBoxes()
     }
@@ -69,16 +71,18 @@ class BoxSet : SKNode {
         let halfBoxSpacing = boxSpacing / 2
         let halfBoxHeight = boxHeightAndWidth / 2
                 
-        pos3 = CGPoint(x: center.x, y: center.y + halfBoxSpacing + halfBoxHeight)
+        pos4 = CGPoint(x: center.x, y: center.y + halfBoxSpacing + halfBoxHeight)
+        pos3 = CGPoint(x: center.x, y: pos4.y + boxHeightAndWidth + boxSpacing)
         pos2 = CGPoint(x: center.x, y: pos3.y + boxHeightAndWidth + boxSpacing)
         pos1 = CGPoint(x: center.x, y: pos2.y + boxHeightAndWidth + boxSpacing)
         pos0 = CGPoint(x: center.x, y: pos1.y + boxHeightAndWidth + boxSpacing)
         
-        pos4 = CGPoint(x: center.x, y: center.y - halfBoxSpacing - halfBoxHeight)
-        pos5 = CGPoint(x: center.x, y: pos4.y - boxHeightAndWidth - boxSpacing)
+        pos5 = CGPoint(x: center.x, y: center.y - halfBoxSpacing - halfBoxHeight)
         pos6 = CGPoint(x: center.x, y: pos5.y - boxHeightAndWidth - boxSpacing)
+        pos7 = CGPoint(x: center.x, y: pos6.y - boxHeightAndWidth - boxSpacing)
+        pos8 = CGPoint(x: center.x, y: pos7.y - boxHeightAndWidth - boxSpacing)
         
-        let boxPositions : [CGPoint] = [pos6, pos5, pos4, pos3, pos2, pos1, pos0]
+        let boxPositions : [CGPoint] = [pos8,pos7,pos6,pos5,pos4,pos3,pos2,pos1,pos0]
         
         for position in boxPositions {
             

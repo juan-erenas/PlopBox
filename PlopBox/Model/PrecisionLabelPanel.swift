@@ -41,6 +41,7 @@ class PrecisionLabelPanel : SKSpriteNode {
     
     private func configurePanel() {
         self.zPosition = -100
+        self.alpha = 0.8
         
         switch precisionRating {
         case .perfect:

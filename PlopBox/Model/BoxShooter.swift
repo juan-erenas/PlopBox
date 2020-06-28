@@ -11,6 +11,7 @@ import SpriteKit
 class BoxShooter : SKSpriteNode {
     
     private var BoxShooterFrames : [SKTexture] = []
+    var readyToShoot = false
     
     
     init(size: CGSize) {
@@ -42,14 +43,14 @@ class BoxShooter : SKSpriteNode {
             
             let firstFrameTexture = self.BoxShooterFrames[0]
             self.texture = firstFrameTexture
-            
+            self.readyToShoot = true
         }
         
     }
     
     func shoot() {
         
-        let shoot = SKAction.animate(with: BoxShooterFrames, timePerFrame: 1/60,resize: false,restore: true)
+        let shoot = SKAction.animate(with: BoxShooterFrames, timePerFrame: 1/120,resize: false,restore: true)
 //        shoot.value(forKey: "BoxShootingAnimation")
         self.run(shoot)
     }

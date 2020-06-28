@@ -7,6 +7,7 @@
 //
 
 import SpriteKit
+import SwiftKeychainWrapper
 
 class MenuScene: SKScene {
     
@@ -24,6 +25,7 @@ class MenuScene: SKScene {
     
     override func didMove(to view: SKView) {
         
+        setDefualts()
         createBackground()
         
         swipeUp = UISwipeGestureRecognizer(target: self, action: #selector(swipedUp))
@@ -34,7 +36,7 @@ class MenuScene: SKScene {
         addChild(menuNode)
 //        addChild(messageNode)
         
-        backgroundColor = UIColor(red: 44/255, green: 62/255, blue: 80/255, alpha: 1.0)
+        backgroundColor = UIColor.white
 //        addLogo()
         addLabels()
         performIntroAnimation()
@@ -45,9 +47,16 @@ class MenuScene: SKScene {
            }
         
     }
-
     
-    
+    func setDefualts() {
+        if KeychainWrapper.standard.string(forKey: "coins") == nil {
+            KeychainWrapper.standard.set("0", forKey: "coins")
+        }
+        
+        if KeychainWrapper.standard.string(forKey: "equipped-box") == nil {
+            KeychainWrapper.standard.set("Normal Box", forKey: "equipped-box")
+        }
+    }
     
     func addLabels() {
         
@@ -61,14 +70,14 @@ class MenuScene: SKScene {
         highscoreLabel.name = "high score label"
         highscoreLabel.fontName = "Marsh-Stencil"
         highscoreLabel.fontSize = 30.0
-        highscoreLabel.fontColor = UIColor.white
-        highscoreLabel.position = CGPoint(x: frame.midX, y: logo.position.y - 190)
+        highscoreLabel.fontColor = UIColor(red: 80/255, green: 95/255, blue: 103/255, alpha: 1)
+        highscoreLabel.position = CGPoint(x: frame.midX, y: logo.position.y - 210)
         menuNode.addChild(highscoreLabel)
         
         let recentScoreLabel = SKLabelNode(text: "SCORE: " + "\(UserDefaults.standard.integer(forKey: "RecentScore"))")
         recentScoreLabel.fontName = "Marsh-Stencil"
         recentScoreLabel.fontSize = 30.0
-        recentScoreLabel.fontColor = UIColor.white
+        recentScoreLabel.fontColor = UIColor(red: 80/255, green: 95/255, blue: 103/255, alpha: 1)
         recentScoreLabel.position = CGPoint(x: frame.midX, y: highscoreLabel.position.y - recentScoreLabel.frame.size.height*2)
         menuNode.addChild(recentScoreLabel)
         
@@ -76,7 +85,7 @@ class MenuScene: SKScene {
         let playLabel = SKLabelNode(text: "- tap to play -")
         playLabel.fontName = "Marsh-Stencil"
         playLabel.fontSize = 30.0
-        playLabel.fontColor = UIColor.white
+        playLabel.fontColor = UIColor(red: 80/255, green: 95/255, blue: 103/255, alpha: 1)
         playLabel.position = CGPoint(x: frame.midX, y: self.frame.minY + 150)
         menuNode.addChild(playLabel)
         animate(label: playLabel)
@@ -85,14 +94,14 @@ class MenuScene: SKScene {
         changePlayerLabel.fontName = "AvenirNext-Bold"
         changePlayerLabel.name = "change player"
         changePlayerLabel.fontSize = 20.0
-        changePlayerLabel.fontColor = UIColor.white
+        changePlayerLabel.fontColor = UIColor(red: 80/255, green: 95/255, blue: 103/255, alpha: 1)
         changePlayerLabel.position = CGPoint(x: frame.midX, y: self.frame.minY + 50)
         menuNode.addChild(changePlayerLabel)
 
         let arrowDown = SKSpriteNode(imageNamed: "arrow-down")
         arrowDown.name = "arrow-down"
         arrowDown.size = CGSize(width: 20.0, height: 10.0)
-        arrowDown.color = UIColor.white
+        arrowDown.color = UIColor(red: 80/255, green: 95/255, blue: 103/255, alpha: 1)
         arrowDown.colorBlendFactor = 1
         arrowDown.position = CGPoint(x: frame.midX, y: changePlayerLabel.position.y - 20)
         menuNode.addChild(arrowDown)
@@ -100,7 +109,7 @@ class MenuScene: SKScene {
         
         let settings = SKSpriteNode(imageNamed: "gear")
         settings.size = CGSize(width: 30.0, height: 30.0)
-        settings.color = UIColor.white
+        settings.color = UIColor(red: 80/255, green: 95/255, blue: 103/255, alpha: 1)
         settings.colorBlendFactor = 1
         settings.position = CGPoint(x: frame.minX + 30, y: frame.maxY - 30)
         menuNode.addChild(settings)
@@ -112,24 +121,21 @@ class MenuScene: SKScene {
         coin.position = CGPoint(x: frame.maxX - 30, y: frame.maxY - 30)
         menuNode.addChild(coin)
         
-        if UserDefaults.standard.integer(forKey: "coins") == 0 {
-            UserDefaults.standard.set(200, forKey: "coins")
-        }
+
         
-        UserDefaults.standard.set(300, forKey: "coins")
-        
-        let currencyText = String(UserDefaults.standard.integer(forKey: "coins"))
+        let currencyText = KeychainWrapper.standard.string(forKey: "coins")
         let currency = SKLabelNode(text: currencyText)
         currency.fontName = "AvenirNext-Bold"
         currency.name = "change player"
         currency.fontSize = 30.0
-        currency.fontColor = UIColor.white
+        currency.fontColor = UIColor(red: 80/255, green: 95/255, blue: 103/255, alpha: 1)
         currency.horizontalAlignmentMode = .right
         currency.verticalAlignmentMode = .center
         currency.position = CGPoint(x: coin.position.x - 20, y: coin.position.y)
         menuNode.addChild(currency)
         
     }
+
     
     func animate(arrow: SKSpriteNode) {
         let pos = arrow.position
@@ -154,15 +160,17 @@ class MenuScene: SKScene {
     
     
     func createBackground() {
-        let color = UIColor(red: 27/255, green: 23/255, blue: 19/255, alpha: 1)
-        let panel = SKSpriteNode(color: color, size: self.size)
-        panel.alpha = 0.6
-        panel.zPosition = -1
-        panel.position = CGPoint(x: self.size.width/2, y: self.size.height/2)
-        self.addChild(panel)
+//        let color = UIColor(red: 27/255, green: 23/255, blue: 19/255, alpha: 1)
+//        let panel = SKSpriteNode(color: color, size: self.size)
+//        panel.alpha = 0.6
+//        panel.zPosition = -1
+//        panel.position = CGPoint(x: self.size.width/2, y: self.size.height/2)
+//        self.addChild(panel)
         
+        createMovingBackground(withImageNamed: "front-background-boxes", height: frame.height, duration: 10,zPosition: -200,alpha: 1)
+        createMovingBackground(withImageNamed: "back-background-boxes", height: frame.height, duration: 30, zPosition: -300,alpha: 0.4)
         //creates moving background for a parallax effect
-        createMovingBackground(withImageNamed: "main-menu-background", height: frame.height, duration: 20,zPosition: -30)
+//        createMovingBackground(withImageNamed: "main-menu-background", height: frame.height, duration: 20,zPosition: -30)
         
 //        let background = SKSpriteNode(texture: SKTexture(imageNamed: "background"))
 //        background.size = CGSize(width: frame.width, height: frame.height)
@@ -174,12 +182,13 @@ class MenuScene: SKScene {
         
     }
     
-    func createMovingBackground(withImageNamed imageName: String,height: CGFloat,duration: Double, zPosition: CGFloat) {
+    func createMovingBackground(withImageNamed imageName: String,height: CGFloat,duration: Double, zPosition: CGFloat,alpha: CGFloat) {
         let backgroundTexture = SKTexture(imageNamed: imageName)
         
         for i in 0 ... 1 {
             let background = SKSpriteNode(texture: backgroundTexture)
             background.size = CGSize(width: frame.width, height: height)
+            background.alpha = alpha
             background.zPosition = zPosition
             background.anchorPoint = CGPoint.zero
             background.position = CGPoint(x: 0, y: (height * CGFloat(i)) - CGFloat(1 * i))
@@ -225,6 +234,7 @@ class MenuScene: SKScene {
         let belowViewY = -self.frame.height
         let moveDown = SKAction.moveTo(y: belowViewY, duration: 0.1)
         let moveUp = SKAction.moveTo(y: posY + 100, duration: 0.3)
+        let wait = SKAction.wait(forDuration: 0.1)
         let presentScene = SKAction.customAction(withDuration: 0) { (_, _) in
             if scene == .gameScene {
                 self.goToGameScene()
@@ -233,7 +243,7 @@ class MenuScene: SKScene {
             }
         }
 
-        let sequence = SKAction.sequence([moveUp,moveDown,presentScene])
+        let sequence = SKAction.sequence([moveUp,moveDown,wait,presentScene])
         menuNode.run(sequence)
     }
     

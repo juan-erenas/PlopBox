@@ -7,6 +7,7 @@
 //
 
 import SpriteKit
+import SwiftKeychainWrapper
 
 class ShopScene : SKScene {
     
@@ -23,6 +24,8 @@ class ShopScene : SKScene {
     
     private var circleIndicators = [SKShapeNode]()
     private var shopBoxes = [ShopBox]()
+    
+    private var equipedBoxName = KeychainWrapper.standard.string(forKey: "equipped-box")
     
     
     override func didMove(to view: SKView) {
@@ -100,7 +103,7 @@ class ShopScene : SKScene {
         coin.position = CGPoint(x: frame.maxX - 30, y: frame.maxY - 30)
         self.addChild(coin)
         
-        let currencyText = String(UserDefaults.standard.integer(forKey: "coins"))
+        let currencyText = KeychainWrapper.standard.string(forKey: "coins")
         let currency = SKLabelNode(text: currencyText)
         currency.fontName = "AvenirNext-Bold"
         currency.name = "change player"
@@ -152,6 +155,7 @@ class ShopScene : SKScene {
         displayBoxesNode.addChild(button)
         
         let boxCost = SKLabelNode(text: "\(shopBox.price)")
+        
         boxCost.name = "box cost"
         boxCost.fontName = "Marsh-Stencil"
         boxCost.fontSize = 30.0
@@ -160,6 +164,13 @@ class ShopScene : SKScene {
         boxCost.horizontalAlignmentMode = .center
         boxCost.position = button.position
         displayBoxesNode.addChild(boxCost)
+        
+        if equipedBoxName == boxName.text {
+            boxCost.text = "Equipped"
+            let green = UIColor.init(red: 34/255, green: 139/255, blue: 34/255, alpha: 1)
+            button.color = green
+            button.size.width = boxSize.width * 1.5
+        }
         
     }
     
@@ -278,12 +289,40 @@ extension ShopScene {
         let shopBox1 = ShopBox(name: "Normal Box", price: 100, locked: false)
         shopBoxes.append(shopBox1)
         
-        let shopBox2 = ShopBox(name: "Right Box", price: 200, locked: true)
+        let shopBox2 = ShopBox(name: "Right Box", price: 200, locked: checkIfLockedFor(key: "Right Box"))
         shopBoxes.append(shopBox2)
         
-        let shopBox3 = ShopBox(name: "Far Right Box", price: 300, locked: true)
+        let shopBox3 = ShopBox(name: "Far Right Box", price: 300, locked: checkIfLockedFor(key: "Far Right Box"))
         shopBoxes.append(shopBox3)
     }
     
     
+    
+    func checkIfLockedFor(key: String) -> Bool {
+        
+        let locked = KeychainWrapper.standard.string(forKey: key)
+        
+        if locked == nil {
+            KeychainWrapper.standard.set("false", forKey: key)
+            return false
+        } else {
+            return locked!.bool!
+        }
+    }
+    
+}
+
+
+//used to convert string to bool
+extension String {
+    var bool: Bool? {
+        switch self.lowercased() {
+        case "true", "t", "yes", "y", "1":
+            return true
+        case "false", "f", "no", "n", "0":
+            return false
+        default:
+            return nil
+        }
+    }
 }

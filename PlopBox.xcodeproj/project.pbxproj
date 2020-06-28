@@ -7,11 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		435013B483154FEB5D023EA6 /* Pods_PlopBox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0EE73D15567B1892248DB4C1 /* Pods_PlopBox.framework */; };
 		4422393024958D5F0057EE42 /* PrecisionRating.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4422392F24958D5F0057EE42 /* PrecisionRating.swift */; };
 		443AA279248312F3005A9647 /* Marsh-Stencil.otf in Resources */ = {isa = PBXBuildFile; fileRef = 443AA278248312F2005A9647 /* Marsh-Stencil.otf */; };
 		444F964B249B386B001C205A /* PrecisionLabelPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 444F964A249B386B001C205A /* PrecisionLabelPanel.swift */; };
 		44558F59247F9BEF00CB85E5 /* GameOverScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44558F58247F9BEF00CB85E5 /* GameOverScene.swift */; };
 		445881F62489BE1F00D20646 /* ShopScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 445881F52489BE1F00D20646 /* ShopScene.swift */; };
+		445E57D5249ED27900B8AC1C /* woosh.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 445E57D2249ED27900B8AC1C /* woosh.mp3 */; };
+		445E57D6249ED27900B8AC1C /* ES_Impact Punch Face 4 - SFX Producer.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 445E57D3249ED27900B8AC1C /* ES_Impact Punch Face 4 - SFX Producer.mp3 */; };
+		445E57D7249ED27900B8AC1C /* shoot-sound.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 445E57D4249ED27900B8AC1C /* shoot-sound.mp3 */; };
 		4467EC6F2473634E00BDAA4D /* BoxSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4467EC6E2473634E00BDAA4D /* BoxSet.swift */; };
 		4467EC7124736C7000BDAA4D /* Box.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4467EC7024736C7000BDAA4D /* Box.swift */; };
 		4467EC7324736F2500BDAA4D /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4467EC7224736F2500BDAA4D /* Settings.swift */; };
@@ -32,11 +36,15 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0EE73D15567B1892248DB4C1 /* Pods_PlopBox.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PlopBox.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4422392F24958D5F0057EE42 /* PrecisionRating.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrecisionRating.swift; sourceTree = "<group>"; };
 		443AA278248312F2005A9647 /* Marsh-Stencil.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Marsh-Stencil.otf"; sourceTree = "<group>"; };
 		444F964A249B386B001C205A /* PrecisionLabelPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrecisionLabelPanel.swift; sourceTree = "<group>"; };
 		44558F58247F9BEF00CB85E5 /* GameOverScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameOverScene.swift; sourceTree = "<group>"; };
 		445881F52489BE1F00D20646 /* ShopScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShopScene.swift; sourceTree = "<group>"; };
+		445E57D2249ED27900B8AC1C /* woosh.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = woosh.mp3; sourceTree = "<group>"; };
+		445E57D3249ED27900B8AC1C /* ES_Impact Punch Face 4 - SFX Producer.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "ES_Impact Punch Face 4 - SFX Producer.mp3"; sourceTree = "<group>"; };
+		445E57D4249ED27900B8AC1C /* shoot-sound.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "shoot-sound.mp3"; sourceTree = "<group>"; };
 		4467EC6E2473634E00BDAA4D /* BoxSet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoxSet.swift; sourceTree = "<group>"; };
 		4467EC7024736C7000BDAA4D /* Box.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Box.swift; sourceTree = "<group>"; };
 		4467EC7224736F2500BDAA4D /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
@@ -56,6 +64,8 @@
 		44FECD4B2473209E00805D0F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		44FECD4D2473209E00805D0F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		44FECD53247321E100805D0F /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
+		5775247878BC98A836A0D25A /* Pods-PlopBox.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PlopBox.release.xcconfig"; path = "Target Support Files/Pods-PlopBox/Pods-PlopBox.release.xcconfig"; sourceTree = "<group>"; };
+		F496532B2805A44135292F8F /* Pods-PlopBox.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PlopBox.debug.xcconfig"; path = "Target Support Files/Pods-PlopBox/Pods-PlopBox.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -63,6 +73,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				435013B483154FEB5D023EA6 /* Pods_PlopBox.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -82,6 +93,8 @@
 			children = (
 				44FECD3A2473209D00805D0F /* PlopBox */,
 				44FECD392473209D00805D0F /* Products */,
+				D8F918FECFE3C853DC83A269 /* Pods */,
+				735115D07F089709BADB5838 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -109,6 +122,9 @@
 		44FECD552473243B00805D0F /* View */ = {
 			isa = PBXGroup;
 			children = (
+				445E57D3249ED27900B8AC1C /* ES_Impact Punch Face 4 - SFX Producer.mp3 */,
+				445E57D4249ED27900B8AC1C /* shoot-sound.mp3 */,
+				445E57D2249ED27900B8AC1C /* woosh.mp3 */,
 				44AA62F02484E36400B5F6F7 /* smoke.sks */,
 				44AA62F12484E36400B5F6F7 /* Assets.xcassets */,
 				44AAD9E02483159900E472BA /* Fonts */,
@@ -147,6 +163,24 @@
 			path = Model;
 			sourceTree = "<group>";
 		};
+		735115D07F089709BADB5838 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				0EE73D15567B1892248DB4C1 /* Pods_PlopBox.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		D8F918FECFE3C853DC83A269 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				F496532B2805A44135292F8F /* Pods-PlopBox.debug.xcconfig */,
+				5775247878BC98A836A0D25A /* Pods-PlopBox.release.xcconfig */,
+			);
+			name = Pods;
+			path = Pods;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -154,9 +188,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 44FECD502473209E00805D0F /* Build configuration list for PBXNativeTarget "PlopBox" */;
 			buildPhases = (
+				4B492A100FF77CEA241D4B78 /* [CP] Check Pods Manifest.lock */,
 				44FECD342473209D00805D0F /* Sources */,
 				44FECD352473209D00805D0F /* Frameworks */,
 				44FECD362473209D00805D0F /* Resources */,
+				F767579A4892B29A8694F235 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -211,11 +247,56 @@
 				44FECD492473209E00805D0F /* Assets.xcassets in Resources */,
 				44AA62F32484E36400B5F6F7 /* Assets.xcassets in Resources */,
 				443AA279248312F3005A9647 /* Marsh-Stencil.otf in Resources */,
+				445E57D7249ED27900B8AC1C /* shoot-sound.mp3 in Resources */,
+				445E57D6249ED27900B8AC1C /* ES_Impact Punch Face 4 - SFX Producer.mp3 in Resources */,
 				44FECD4C2473209E00805D0F /* LaunchScreen.storyboard in Resources */,
+				445E57D5249ED27900B8AC1C /* woosh.mp3 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		4B492A100FF77CEA241D4B78 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-PlopBox-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		F767579A4892B29A8694F235 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-PlopBox/Pods-PlopBox-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-PlopBox/Pods-PlopBox-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-PlopBox/Pods-PlopBox-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		44FECD342473209D00805D0F /* Sources */ = {
@@ -378,6 +459,7 @@
 		};
 		44FECD512473209E00805D0F /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = F496532B2805A44135292F8F /* Pods-PlopBox.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
@@ -396,6 +478,7 @@
 		};
 		44FECD522473209E00805D0F /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 5775247878BC98A836A0D25A /* Pods-PlopBox.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
