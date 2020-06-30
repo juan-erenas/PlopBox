@@ -3,16 +3,16 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 51;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		435013B483154FEB5D023EA6 /* Pods_PlopBox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0EE73D15567B1892248DB4C1 /* Pods_PlopBox.framework */; };
+		44040F7B24ABC6000097C0B5 /* ShopBoxDisplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44040F7A24ABC6000097C0B5 /* ShopBoxDisplay.swift */; };
 		4422393024958D5F0057EE42 /* PrecisionRating.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4422392F24958D5F0057EE42 /* PrecisionRating.swift */; };
 		443AA279248312F3005A9647 /* Marsh-Stencil.otf in Resources */ = {isa = PBXBuildFile; fileRef = 443AA278248312F2005A9647 /* Marsh-Stencil.otf */; };
 		444F964B249B386B001C205A /* PrecisionLabelPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 444F964A249B386B001C205A /* PrecisionLabelPanel.swift */; };
 		44558F59247F9BEF00CB85E5 /* GameOverScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44558F58247F9BEF00CB85E5 /* GameOverScene.swift */; };
-		445881F62489BE1F00D20646 /* ShopScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 445881F52489BE1F00D20646 /* ShopScene.swift */; };
 		445E57D5249ED27900B8AC1C /* woosh.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 445E57D2249ED27900B8AC1C /* woosh.mp3 */; };
 		445E57D6249ED27900B8AC1C /* ES_Impact Punch Face 4 - SFX Producer.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 445E57D3249ED27900B8AC1C /* ES_Impact Punch Face 4 - SFX Producer.mp3 */; };
 		445E57D7249ED27900B8AC1C /* shoot-sound.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 445E57D4249ED27900B8AC1C /* shoot-sound.mp3 */; };
@@ -37,11 +37,11 @@
 
 /* Begin PBXFileReference section */
 		0EE73D15567B1892248DB4C1 /* Pods_PlopBox.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PlopBox.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		44040F7A24ABC6000097C0B5 /* ShopBoxDisplay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShopBoxDisplay.swift; sourceTree = "<group>"; };
 		4422392F24958D5F0057EE42 /* PrecisionRating.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrecisionRating.swift; sourceTree = "<group>"; };
 		443AA278248312F2005A9647 /* Marsh-Stencil.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Marsh-Stencil.otf"; sourceTree = "<group>"; };
 		444F964A249B386B001C205A /* PrecisionLabelPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrecisionLabelPanel.swift; sourceTree = "<group>"; };
 		44558F58247F9BEF00CB85E5 /* GameOverScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameOverScene.swift; sourceTree = "<group>"; };
-		445881F52489BE1F00D20646 /* ShopScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShopScene.swift; sourceTree = "<group>"; };
 		445E57D2249ED27900B8AC1C /* woosh.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = woosh.mp3; sourceTree = "<group>"; };
 		445E57D3249ED27900B8AC1C /* ES_Impact Punch Face 4 - SFX Producer.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "ES_Impact Punch Face 4 - SFX Producer.mp3"; sourceTree = "<group>"; };
 		445E57D4249ED27900B8AC1C /* shoot-sound.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "shoot-sound.mp3"; sourceTree = "<group>"; };
@@ -142,7 +142,6 @@
 				44FECD412473209D00805D0F /* MenuScene.swift */,
 				44FECD53247321E100805D0F /* GameScene.swift */,
 				44558F58247F9BEF00CB85E5 /* GameOverScene.swift */,
-				445881F52489BE1F00D20646 /* ShopScene.swift */,
 			);
 			path = Controller;
 			sourceTree = "<group>";
@@ -159,6 +158,7 @@
 				4422392F24958D5F0057EE42 /* PrecisionRating.swift */,
 				444F964A249B386B001C205A /* PrecisionLabelPanel.swift */,
 				44F3BAEB248C328D000A5CA4 /* shopBox.swift */,
+				44040F7A24ABC6000097C0B5 /* ShopBoxDisplay.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -177,7 +177,6 @@
 				F496532B2805A44135292F8F /* Pods-PlopBox.debug.xcconfig */,
 				5775247878BC98A836A0D25A /* Pods-PlopBox.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -308,10 +307,10 @@
 				44FECD422473209D00805D0F /* MenuScene.swift in Sources */,
 				44558F59247F9BEF00CB85E5 /* GameOverScene.swift in Sources */,
 				44FECD442473209D00805D0F /* GameViewController.swift in Sources */,
+				44040F7B24ABC6000097C0B5 /* ShopBoxDisplay.swift in Sources */,
 				44F3BAEC248C328D000A5CA4 /* shopBox.swift in Sources */,
 				44FECD54247321E100805D0F /* GameScene.swift in Sources */,
 				4467EC7124736C7000BDAA4D /* Box.swift in Sources */,
-				445881F62489BE1F00D20646 /* ShopScene.swift in Sources */,
 				4467EC7324736F2500BDAA4D /* Settings.swift in Sources */,
 				4422393024958D5F0057EE42 /* PrecisionRating.swift in Sources */,
 				4467EC6F2473634E00BDAA4D /* BoxSet.swift in Sources */,

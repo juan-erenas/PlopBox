@@ -19,25 +19,40 @@ class MenuScene: SKScene {
         case changePlayer
     }
     
-    var swipeUp = UISwipeGestureRecognizer()
+    private var displayBoxesNode = SKNode()
+    private var originalNodePosition = CGPoint()
+    private var swipeRight = UISwipeGestureRecognizer()
+    private var swipeLeft = UISwipeGestureRecognizer()
+    private var boxSize = CGSize()
+    private var activeBox = 0
+    private var transitioning = false
+    private var shopBoxes = [ShopBox]()
+    private var equipedBoxName = KeychainWrapper.standard.string(forKey: "equipped-box")
     
     var dimPanel : SKSpriteNode?
     
     override func didMove(to view: SKView) {
         
         setDefualts()
-        createBackground()
         
-        swipeUp = UISwipeGestureRecognizer(target: self, action: #selector(swipedUp))
-        swipeUp.direction = .up
-        view.addGestureRecognizer(swipeUp)
-//        messageNode.zPosition = 1
+        menuNode.addChild(displayBoxesNode)
+        originalNodePosition = displayBoxesNode.position
+        createShopBoxes()
+        addDisplayBoxes()
+        
+        swipeRight = UISwipeGestureRecognizer(target: self, action: #selector(swipedRight))
+        swipeRight.direction = .right
+        view.addGestureRecognizer(swipeRight)
+        
+        swipeLeft = UISwipeGestureRecognizer(target: self, action: #selector(swipedLeft))
+        swipeLeft.direction = .left
+        view.addGestureRecognizer(swipeLeft)
+        
+        createBackground()
             
         addChild(menuNode)
-//        addChild(messageNode)
         
         backgroundColor = UIColor.white
-//        addLogo()
         addLabels()
         performIntroAnimation()
         
@@ -61,22 +76,22 @@ class MenuScene: SKScene {
     func addLabels() {
         
         let logo = SKSpriteNode(imageNamed: "plop-box-logo")
-        let width = self.frame.size.width / 4 * 3
+        let width = self.frame.size.width / 8 * 5
         logo.size = CGSize(width: width, height: width)
-        logo.position = CGPoint(x: frame.midX, y: frame.midY + (frame.height/4) - 50)
+        logo.position = CGPoint(x: frame.midX, y: frame.midY + (frame.height/4))
         menuNode.addChild(logo)
         
         let highscoreLabel = SKLabelNode(text: "HI-SCORE: " + "\(UserDefaults.standard.integer(forKey: "Highscore"))")
         highscoreLabel.name = "high score label"
         highscoreLabel.fontName = "Marsh-Stencil"
-        highscoreLabel.fontSize = 30.0
+        highscoreLabel.fontSize = 25.0
         highscoreLabel.fontColor = UIColor(red: 80/255, green: 95/255, blue: 103/255, alpha: 1)
-        highscoreLabel.position = CGPoint(x: frame.midX, y: logo.position.y - 210)
+        highscoreLabel.position = CGPoint(x: frame.midX, y: logo.position.y - 170)
         menuNode.addChild(highscoreLabel)
         
         let recentScoreLabel = SKLabelNode(text: "SCORE: " + "\(UserDefaults.standard.integer(forKey: "RecentScore"))")
         recentScoreLabel.fontName = "Marsh-Stencil"
-        recentScoreLabel.fontSize = 30.0
+        recentScoreLabel.fontSize = 25.0
         recentScoreLabel.fontColor = UIColor(red: 80/255, green: 95/255, blue: 103/255, alpha: 1)
         recentScoreLabel.position = CGPoint(x: frame.midX, y: highscoreLabel.position.y - recentScoreLabel.frame.size.height*2)
         menuNode.addChild(recentScoreLabel)
@@ -86,26 +101,9 @@ class MenuScene: SKScene {
         playLabel.fontName = "Marsh-Stencil"
         playLabel.fontSize = 30.0
         playLabel.fontColor = UIColor(red: 80/255, green: 95/255, blue: 103/255, alpha: 1)
-        playLabel.position = CGPoint(x: frame.midX, y: self.frame.minY + 150)
+        playLabel.position = CGPoint(x: frame.midX, y: self.frame.minY + playLabel.frame.height * 4)
         menuNode.addChild(playLabel)
         animate(label: playLabel)
-        
-        let changePlayerLabel = SKLabelNode(text: "change box")
-        changePlayerLabel.fontName = "AvenirNext-Bold"
-        changePlayerLabel.name = "change player"
-        changePlayerLabel.fontSize = 20.0
-        changePlayerLabel.fontColor = UIColor(red: 80/255, green: 95/255, blue: 103/255, alpha: 1)
-        changePlayerLabel.position = CGPoint(x: frame.midX, y: self.frame.minY + 50)
-        menuNode.addChild(changePlayerLabel)
-
-        let arrowDown = SKSpriteNode(imageNamed: "arrow-down")
-        arrowDown.name = "arrow-down"
-        arrowDown.size = CGSize(width: 20.0, height: 10.0)
-        arrowDown.color = UIColor(red: 80/255, green: 95/255, blue: 103/255, alpha: 1)
-        arrowDown.colorBlendFactor = 1
-        arrowDown.position = CGPoint(x: frame.midX, y: changePlayerLabel.position.y - 20)
-        menuNode.addChild(arrowDown)
-        animate(arrow: arrowDown)
         
         let settings = SKSpriteNode(imageNamed: "gear")
         settings.size = CGSize(width: 30.0, height: 30.0)
@@ -121,8 +119,6 @@ class MenuScene: SKScene {
         coin.position = CGPoint(x: frame.maxX - 30, y: frame.maxY - 30)
         menuNode.addChild(coin)
         
-
-        
         let currencyText = KeychainWrapper.standard.string(forKey: "coins")
         let currency = SKLabelNode(text: currencyText)
         currency.fontName = "AvenirNext-Bold"
@@ -135,15 +131,82 @@ class MenuScene: SKScene {
         menuNode.addChild(currency)
         
     }
-
     
-    func animate(arrow: SKSpriteNode) {
-        let pos = arrow.position
-
-        let moveDown = SKAction.moveTo(y: pos.y - 5, duration: 0.5)
-        let moveUp = SKAction.move(to: pos, duration: 0.5)
-        let sequence = SKAction.sequence([moveDown,moveUp])
-        arrow.run(SKAction.repeatForever(sequence))
+    func addDisplayBoxes() {
+        
+        boxSize = CGSize(width: self.frame.width / 6, height: self.frame.width / 6)
+        
+        //Make box in middle of screen
+        let middleBoxPosition = CGPoint(x: self.frame.midX - boxSize.width/2, y: self.frame.midY - self.frame.height/6)
+        create(shopBox: shopBoxes[activeBox], atPos: middleBoxPosition, animate: true)
+        
+        if activeBox > 0 {
+            //Make Box on Left
+            let leftBoxPosition = CGPoint(x: middleBoxPosition.x - self.frame.width, y: middleBoxPosition.y)
+            create(shopBox: shopBoxes[activeBox - 1], atPos: leftBoxPosition, animate: false)
+        }
+        
+        if activeBox < shopBoxes.count - 1 {
+            //Make Box on Right
+            let rightBoxPosition = CGPoint(x: middleBoxPosition.x + self.frame.width, y: middleBoxPosition.y)
+            create(shopBox: shopBoxes[activeBox + 1], atPos: rightBoxPosition, animate: false)
+        }
+    }
+    
+    
+    //MARK: - Create Boxes
+    
+    private func create(shopBox: ShopBox,atPos pos: CGPoint,animate: Bool) {
+        
+        let size = boxSize
+        let box = Box(size: size)
+        box.position = pos
+        displayBoxesNode.addChild(box)
+        
+        if animate == true {
+            self.animate(box: box)
+        }
+        
+        if equipedBoxName != shopBox.name {
+            
+            let buttonSize = CGSize(width: boxSize.width, height: boxSize.width / 3)
+            let button = SKSpriteNode(color: .red, size: buttonSize)
+            button.position = CGPoint(x: box.position.x + box.size.width/2, y: box.position.y - box.size.height)
+            displayBoxesNode.addChild(button)
+            
+            let boxCost = SKLabelNode(text: "\(shopBox.price)")
+            
+            boxCost.name = "box cost"
+            boxCost.fontName = "Marsh-Stencil"
+            boxCost.fontSize = 20.0
+            boxCost.fontColor = UIColor.white
+            boxCost.verticalAlignmentMode = .center
+            boxCost.horizontalAlignmentMode = .center
+            boxCost.position = button.position
+            displayBoxesNode.addChild(boxCost)
+        }
+        
+    }
+    
+    func animate(box: Box) {
+        
+        let originalPos = box.position
+        let goUp = SKAction.moveTo(y: originalPos.y + 10, duration: 0.5)
+        let goDown = SKAction.moveTo(y: originalPos.y - 10, duration: 0.5)
+        
+        goUp.timingMode = .easeInEaseOut
+        goDown.timingMode = .easeInEaseOut
+        
+        let sequence = SKAction.sequence([goUp,goDown])
+        let repeatForever = SKAction.repeatForever(sequence)
+        box.run(repeatForever)
+        
+    }
+    
+    private func updateBoxes() {
+        displayBoxesNode.removeAllChildren()
+        displayBoxesNode.position = originalNodePosition
+        addDisplayBoxes()
     }
     
     
@@ -156,29 +219,10 @@ class MenuScene: SKScene {
         label.run(SKAction.repeatForever(sequence))
     }
     
-    
-    
-    
     func createBackground() {
-//        let color = UIColor(red: 27/255, green: 23/255, blue: 19/255, alpha: 1)
-//        let panel = SKSpriteNode(color: color, size: self.size)
-//        panel.alpha = 0.6
-//        panel.zPosition = -1
-//        panel.position = CGPoint(x: self.size.width/2, y: self.size.height/2)
-//        self.addChild(panel)
-        
+
         createMovingBackground(withImageNamed: "front-background-boxes", height: frame.height, duration: 10,zPosition: -200,alpha: 1)
         createMovingBackground(withImageNamed: "back-background-boxes", height: frame.height, duration: 30, zPosition: -300,alpha: 0.4)
-        //creates moving background for a parallax effect
-//        createMovingBackground(withImageNamed: "main-menu-background", height: frame.height, duration: 20,zPosition: -30)
-        
-//        let background = SKSpriteNode(texture: SKTexture(imageNamed: "background"))
-//        background.size = CGSize(width: frame.width, height: frame.height)
-//        background.zPosition = -40
-//        background.position = CGPoint(x: frame.midX, y: frame.midY)
-//        self.addChild(background)
-        
-        //this is the node that dims everything when the game is paused.
         
     }
     
@@ -203,6 +247,51 @@ class MenuScene: SKScene {
             background.run(moveForever)
         }
     }
+    
+    //MARK: - Handle Transactions
+    
+    func touchedBuyButton(forBoxNamed boxName: String) {
+        
+    }
+    
+    
+    //MARK: - Handle Touches
+    
+    @objc func swipedRight() {
+        if activeBox <= 0 {return}
+        if transitioning {return}
+        activeBox -= 1
+        transitioning = true
+        let duration = 0.3
+        
+        //change boxes
+        let moveRight = SKAction.moveBy(x: self.frame.width, y: 0, duration: duration)
+        moveRight.timingMode = .easeOut
+        let updateBoxes = SKAction.customAction(withDuration: 0) { (_, _) in
+            self.updateBoxes()
+            self.transitioning = false
+        }
+        let sequence = SKAction.sequence([moveRight,updateBoxes])
+        displayBoxesNode.run(sequence)
+        
+    }
+    
+    @objc func swipedLeft() {
+        if activeBox >= shopBoxes.count - 1 {return}
+        if transitioning {return}
+        activeBox += 1
+        transitioning = true
+        let duration = 0.3
+        let moveLeft = SKAction.moveBy(x: -self.frame.width, y: 0, duration: duration)
+        moveLeft.timingMode = .easeOut
+        let updateBoxes = SKAction.customAction(withDuration: 0) { (_, _) in
+            self.updateBoxes()
+            self.transitioning = false
+        }
+        let sequence = SKAction.sequence([moveLeft,updateBoxes])
+        displayBoxesNode.run(sequence)
+    }
+    
     
     //MARK: - Exit Scene Animations
     
@@ -275,22 +364,59 @@ class MenuScene: SKScene {
         panel.run(sequence!)
     }
     
-    @objc func swipedUp() {
-        goToCharacterSelect()
-    }
-    
-    func goToCharacterSelect() {
-        self.view?.removeGestureRecognizer(swipeUp)
-        let characterSelect = ShopScene(size: self.view!.bounds.size)
-        let transition = SKTransition.moveIn(with: .down, duration: 0.3)
-        self.view!.presentScene(characterSelect, transition: transition)
-    }
-    
     func goToGameScene() {
-        self.view?.removeGestureRecognizer(swipeUp)
         let gameScene = GameScene(size: self.view!.bounds.size)
         self.view!.presentScene(gameScene)
     }
     
 }
 
+
+
+//MARK: - Create Shop Boxes
+
+extension MenuScene {
+    
+    private func createShopBoxes() {
+        if shopBoxes.count != 0 {return}
+        
+        let shopBox1 = ShopBox(name: "Normal Box", price: 100, locked: false)
+        shopBoxes.append(shopBox1)
+        
+        let shopBox2 = ShopBox(name: "Right Box", price: 200, locked: checkIfLockedFor(key: "Right Box"))
+        shopBoxes.append(shopBox2)
+        
+        let shopBox3 = ShopBox(name: "Far Right Box", price: 300, locked: checkIfLockedFor(key: "Far Right Box"))
+        shopBoxes.append(shopBox3)
+    }
+    
+    
+    
+    func checkIfLockedFor(key: String) -> Bool {
+        
+        let locked = KeychainWrapper.standard.string(forKey: key)
+        
+        if locked == nil {
+            KeychainWrapper.standard.set("false", forKey: key)
+            return false
+        } else {
+            return locked!.bool!
+        }
+    }
+    
+}
+
+
+//used to convert string to bool
+extension String {
+    var bool: Bool? {
+        switch self.lowercased() {
+        case "true", "t", "yes", "y", "1":
+            return true
+        case "false", "f", "no", "n", "0":
+            return false
+        default:
+            return nil
+        }
+    }
+}
