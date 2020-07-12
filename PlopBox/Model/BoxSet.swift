@@ -43,20 +43,23 @@ class BoxSet : SKNode {
     private var boxHeightAndWidth : CGFloat
     private var boxSpacing : CGFloat
     
+    private var boxName : String
+    
     weak var delegate : BoxSetDelegate?
     
-    convenience init(height: CGFloat, position: CGPoint, moveBoxDuration: CGFloat,shootPoint: CGPoint) {
-        self.init(height: height, position: position,shootPoint: shootPoint)
+    convenience init(height: CGFloat, position: CGPoint, moveBoxDuration: CGFloat,shootPoint: CGPoint,boxName: String) {
+        self.init(height: height, position: position,shootPoint: shootPoint,boxName: boxName)
         self.shootPoint = shootPoint
         self.moveBoxDuration = moveBoxDuration
     }
     
-    init(height: CGFloat, position: CGPoint,shootPoint: CGPoint) {
+    init(height: CGFloat, position: CGPoint,shootPoint: CGPoint,boxName: String) {
         screenSize = height
         center = position
         self.shootPoint = shootPoint
         boxHeightAndWidth = (0.85 * screenSize) / 8
         boxSpacing = (0.15 * screenSize) / 9
+        self.boxName = boxName
         super.init()
         addBoxes()
     }
@@ -133,7 +136,7 @@ class BoxSet : SKNode {
     }
     
     private func createBox(AtPos pos: CGPoint,andSize boxSize: CGSize) -> SKSpriteNode {
-        let box = Box(size: boxSize)
+        let box = Box(size: boxSize,imageNamed: boxName)
         box.position = pos
         
         return box
@@ -168,7 +171,7 @@ class BoxSet : SKNode {
     private func createHolder(atPos pos: CGPoint) -> SKSpriteNode {
         let distanceLeftOfBoxes = center.x - self.frame.minX
         let holderXPos = center.x - ((distanceLeftOfBoxes * 0.05) / 2)
-        let holderSize = CGSize(width: boxHeightAndWidth * 0.2, height: boxHeightAndWidth * 0.6)
+        let holderSize = CGSize(width: boxHeightAndWidth * 0.2, height: boxHeightAndWidth * 0.4)
         let boxHolder = SKSpriteNode(texture: SKTexture(imageNamed: "Box-Holder"), size: holderSize)
         boxHolder.position = CGPoint(x: holderXPos, y: pos.y)
         boxHolder.zPosition = -10
@@ -306,13 +309,15 @@ class BoxSet : SKNode {
     //MARK: - Adding Shooter Box
     
     func addShooterBoxToLine(atYPos yPos: CGFloat) {
-        //Check accuracy
-        checkAccuracyForShotAt(boxYPos: yPos)
+       
         
         //Creat Box
         let box = createBox(AtPos: CGPoint(x: center.x, y: yPos), andSize: CGSize(width: boxHeightAndWidth, height: boxHeightAndWidth))
         self.addChild(box)
         shooterBoxArray.append(box)
+        
+        //Check accuracy
+        checkAccuracyOf(box: box as! Box)
         
         let boxHolder = createHolder(atPos: CGPoint(x: center.x, y: yPos))
         self.addChild(boxHolder)
@@ -326,7 +331,8 @@ class BoxSet : SKNode {
         wobble(box: box)
     }
     
-    private func checkAccuracyForShotAt(boxYPos: CGFloat) {
+    private func checkAccuracyOf(box: Box) {
+        let boxYPos = box.position.y
         //add code to check accuracy and deal with it
         let targetInvisibleBox = invisibleBoxArray[0]
         let distanceToTarget = abs(targetInvisibleBox.position.y - boxYPos)

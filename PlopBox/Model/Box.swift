@@ -11,9 +11,11 @@ import SpriteKit
 class Box : SKSpriteNode {
     
     var hasBeenChecked = false
+    var textureName : String
     
-    init(size: CGSize) {
-        super.init(texture: SKTexture(imageNamed: "box"), color: .clear, size: size)
+    init(size: CGSize,imageNamed imageName: String) {
+        self.textureName = imageName
+        super.init(texture: SKTexture(imageNamed: imageName), color: .clear, size: size)
         configureBox()
     }
     
@@ -36,6 +38,9 @@ class Box : SKSpriteNode {
         
         self.name = "box"
         self.zPosition = 0
+        
+        
+        
     }
     
 }

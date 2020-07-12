@@ -40,6 +40,7 @@ class PrecisionLabelPanel : SKSpriteNode {
     
     
     private func configurePanel() {
+        
         self.zPosition = -100
         self.alpha = 0.8
         
@@ -65,17 +66,17 @@ class PrecisionLabelPanel : SKSpriteNode {
     }
     
     private func configureAwesomeLabel() {
-        self.color = .blue
+        self.color = UIColor(red: 137/255, green: 207/255, blue: 240/255, alpha: 1)
         label.text = "AWESOME!"
         
         runAnimation()
     }
     
     private func configureGoodLabel() {
-        self.color = .gray
-        label.text = "GOOD"
-        
-        runAnimation()
+//        self.color = .gray
+//        label.text = "GOOD"
+//
+//        runAnimation()
         
     }
     

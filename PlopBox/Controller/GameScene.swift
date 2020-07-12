@@ -25,7 +25,7 @@ class GameScene: SKScene {
     private var rightNode = SKNode()
     private var coverScreen = SKSpriteNode()
     //used to prevent multiple contacts from calling game over
-    private var gameActive = true
+    private var gameActive = false
     var currentScore = 0
     var currentMoney = 0
     var canRetry = true
@@ -33,7 +33,11 @@ class GameScene: SKScene {
     private var scoreLabel : SKLabelNode?
     private var moneyLabel : SKLabelNode!
     
+    private var audioManager = AudioManger()
+    
     var gameRestarted = false
+    
+    private var equipedBoxName = KeychainWrapper.standard.string(forKey: "equipped-box")
     
     override func didMove(to view: SKView) {
         
@@ -66,6 +70,8 @@ class GameScene: SKScene {
         if gameRestarted {
             restartGame()
         }
+        
+        NotificationCenter.default.post(name: Notification.Name(rawValue: "PlayBackgroundSoundHigh"), object: self)
     }
     
     //MARK: - Scene Setup
@@ -95,7 +101,10 @@ class GameScene: SKScene {
         let moveRight = SKAction.moveTo(x: self.frame.maxX + self.frame.width / 2, duration: 0)
         let slowlyMoveLeft = SKAction.moveTo(x: self.frame.minX, duration: duration)
         slowlyMoveLeft.timingMode = .easeOut
-        let rightNodeSequence = SKAction.sequence([moveRight,makeVisible,slowlyMoveLeft])
+        let makeGameActive = SKAction.customAction(withDuration: 0) { (_, _) in
+            self.gameActive = true
+        }
+        let rightNodeSequence = SKAction.sequence([moveRight,makeVisible,slowlyMoveLeft,makeGameActive])
         rightNode.run(rightNodeSequence)
         
         //Left Node
@@ -160,7 +169,7 @@ class GameScene: SKScene {
     func addBoxSet() {
         let xPos = self.frame.minX + shootingBox.size.width - shootingBox.size.width/2
         let shootPoint = CGPoint(x: xPos, y: shootingBox.position.y)
-        boxSet = BoxSet(height: self.frame.height, position: CGPoint(x: xPos, y: self.frame.midY),shootPoint: shootPoint)
+        boxSet = BoxSet(height: self.frame.height, position: CGPoint(x: xPos, y: self.frame.midY),shootPoint: shootPoint,boxName: equipedBoxName!)
         leftNode.addChild(boxSet)
         boxSet.delegate = self
     }
@@ -174,7 +183,7 @@ class GameScene: SKScene {
         let yPos = self.frame.midY - fourthOfHeight
         let position = CGPoint(x: xPos, y: yPos)
         
-        shootingBox = ShooterBox(size: CGSize(width: size, height: size),position: position)
+        shootingBox = ShooterBox(size: CGSize(width: size, height: size),position: position,imageNamed: equipedBoxName!)
         
         rightNode.addChild(shootingBox)
     }
@@ -263,8 +272,35 @@ class GameScene: SKScene {
         if let label = moneyLabel {
             updateNumberFor(label: label, toNumber: "\(currentMoney)")
         }
+        
+        addMoneyAddedLabel()
+        
         //save the new amount to keychain
         KeychainWrapper.standard.set("\(currentMoney)", forKey: "coins")
+    }
+    
+    func addMoneyAddedLabel() {
+        let moneyAddedLabel = SKLabelNode(text: "+ 1")
+        moneyAddedLabel.fontName = "AvenirNext-Bold"
+        moneyAddedLabel.name = "change player"
+        moneyAddedLabel.fontSize = 30.0
+        moneyAddedLabel.color = UIColor(red: 80/255, green: 95/255, blue: 103/255, alpha: 1)
+        moneyAddedLabel.colorBlendFactor = 1
+        moneyAddedLabel.horizontalAlignmentMode = .right
+        moneyAddedLabel.verticalAlignmentMode = .center
+        moneyAddedLabel.position = CGPoint(x: moneyLabel.position.x, y: moneyLabel.position.y - moneyLabel.frame.height * 1.5)
+        worldNode.addChild(moneyAddedLabel)
+        
+        //make it move down and fade and then remove
+        let moveDown = SKAction.moveBy(x: 0, y: -moneyAddedLabel.frame.height * 3, duration: 0.6)
+        let fade = SKAction.fadeAlpha(to: 0, duration: 0.6)
+        let moveDownAndFade = SKAction.group([moveDown,fade])
+        moveDownAndFade.timingMode = .easeOut
+        
+        let remove = SKAction.removeFromParent()
+        
+        let sequence = SKAction.sequence([moveDownAndFade,remove])
+        moneyAddedLabel.run(sequence)
     }
     
     func updateNumberFor(label: SKLabelNode,toNumber number: String) {
@@ -278,14 +314,16 @@ class GameScene: SKScene {
     
     
     //MARK: - Shoot Box Handler
-    
     @objc func shootBox() {
         //box shooter needs a second to load the textures, and then it's ready
         if boxShooter.readyToShoot == false {return}
         //used to avoid shooting while already firing
         if shootingBox.currentlyShooting == true {return}
+        //prevents shooting before intro animation is complete
+        if gameActive == false {return}
         
         boxShooter.shoot()
+        audioManager.play(sound: .shootSound)
         shootingBox.removeAllActions()
         shootingBox.currentlyShooting = true
         
@@ -298,6 +336,7 @@ class GameScene: SKScene {
         let move = SKAction.moveTo(x: boxSet.center.x, duration: 0.1)
         let addToLineAndReset = SKAction.customAction(withDuration: 0) { (_, _) in
 //            self.addImpactParticles(atLocation: CGPoint(x: self.boxSet.center.x, y: self.shootingBox.position.y))
+            self.audioManager.play(sound: .boxHitSound)
             self.boxSet.makeBoxesNotDynamic()
             self.shootingBox.removePhysicsBody()
             self.addPointToScore()
@@ -404,17 +443,20 @@ class GameScene: SKScene {
     
     // MARK: - Game Over Handler
     func endGame(withWait shouldWait: Bool) {
-        
+        if gameActive == false {return}
         gameActive = false
 
+        saveHighScore()
         
         view?.removeGestureRecognizer(tap)
+        
+        NotificationCenter.default.post(name: Notification.Name(rawValue: "StopBackgroundSound"), object: self)
         
         //add code to go to game over screen
         let wait = SKAction.wait(forDuration: 1)
         
         //decides if you should get a chance to retry
-        if currentScore >= 2 && canRetry {
+        if currentScore >= 10 && canRetry {
             let goToGameOverScene = SKAction.customAction(withDuration: 0) { (_, _) in
                 let gameOverScene = GameOverScene(size: self.view!.bounds.size)
                 gameOverScene.currentScore = self.currentScore
@@ -462,6 +504,17 @@ class GameScene: SKScene {
         boxSet.checkPosOfLastBox()
         boxSet.checkPosOfFirstBox()
     }
+    
+    func saveHighScore() {
+        //saves the games last score
+        KeychainWrapper.standard.set(currentScore, forKey: "recent-score")
+        
+        //checks if your score is better than the high score
+        let highScore = KeychainWrapper.standard.integer(forKey: "high-score") ?? 0
+        if currentScore >= highScore {
+            KeychainWrapper.standard.set(currentScore, forKey: "high-score")
+        }
+    }
 }
 
 // MARK: - Contact Handler
@@ -476,7 +529,6 @@ extension GameScene: SKPhysicsContactDelegate {
         endGame(withWait: true)
 
     }
-    
 }
 
 
@@ -498,8 +550,17 @@ extension GameScene : BoxSetDelegate {
         precisionLabelPanel.position = CGPoint(x: self.frame.midX, y: self.frame.midY)
         worldNode.addChild(precisionLabelPanel)
         
-        if precisionRating == .perfect {
+        switch precisionRating {
+        case .perfect:
+            audioManager.play(sound: .perfectAccuracySound)
             addMoney()
+        case .awesome:
+            audioManager.play(sound: .awesomeAccuracySound)
+        case .good:
+            audioManager.play(sound: .goodAccuracySound)
+        case .missed:
+            //change this when you get sound for missed
+            audioManager.play(sound: .goodAccuracySound)
         }
         
 //        let precisionLabel = PrecisionRatingLabel(precisionRating: precisionRating, fontSize: 40, withDuration: Double(boxSet.moveBoxDuration / 6))

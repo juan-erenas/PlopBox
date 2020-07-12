@@ -56,20 +56,18 @@ class MenuScene: SKScene {
         addLabels()
         performIntroAnimation()
         
-        if let musicURL = Bundle.main.url(forResource: "CreoSphere", withExtension: "mp3") {
-               backgroundMusic = SKAudioNode(url: musicURL)
-               addChild(backgroundMusic)
-           }
+        NotificationCenter.default.post(name: Notification.Name(rawValue: "PlayBackgroundSoundLow"), object: self)
         
     }
     
     func setDefualts() {
+        
         if KeychainWrapper.standard.string(forKey: "coins") == nil {
             KeychainWrapper.standard.set("0", forKey: "coins")
         }
         
         if KeychainWrapper.standard.string(forKey: "equipped-box") == nil {
-            KeychainWrapper.standard.set("Normal Box", forKey: "equipped-box")
+            KeychainWrapper.standard.set("box", forKey: "equipped-box")
         }
     }
     
@@ -81,7 +79,7 @@ class MenuScene: SKScene {
         logo.position = CGPoint(x: frame.midX, y: frame.midY + (frame.height/4))
         menuNode.addChild(logo)
         
-        let highscoreLabel = SKLabelNode(text: "HI-SCORE: " + "\(UserDefaults.standard.integer(forKey: "Highscore"))")
+        let highscoreLabel = SKLabelNode(text: "HI-SCORE: " + "\(KeychainWrapper.standard.integer(forKey: "high-score") ?? 0)")
         highscoreLabel.name = "high score label"
         highscoreLabel.fontName = "Marsh-Stencil"
         highscoreLabel.fontSize = 25.0
@@ -89,7 +87,7 @@ class MenuScene: SKScene {
         highscoreLabel.position = CGPoint(x: frame.midX, y: logo.position.y - 170)
         menuNode.addChild(highscoreLabel)
         
-        let recentScoreLabel = SKLabelNode(text: "SCORE: " + "\(UserDefaults.standard.integer(forKey: "RecentScore"))")
+        let recentScoreLabel = SKLabelNode(text: "SCORE: " + "\(KeychainWrapper.standard.integer(forKey: "recent-score") ?? 0)")
         recentScoreLabel.fontName = "Marsh-Stencil"
         recentScoreLabel.fontSize = 25.0
         recentScoreLabel.fontColor = UIColor(red: 80/255, green: 95/255, blue: 103/255, alpha: 1)
@@ -140,6 +138,8 @@ class MenuScene: SKScene {
         let middleBoxPosition = CGPoint(x: self.frame.midX - boxSize.width/2, y: self.frame.midY - self.frame.height/6)
         create(shopBox: shopBoxes[activeBox], atPos: middleBoxPosition, animate: true)
         
+        KeychainWrapper.standard.set(shopBoxes[activeBox].name, forKey: "equipped-box")
+        
         if activeBox > 0 {
             //Make Box on Left
             let leftBoxPosition = CGPoint(x: middleBoxPosition.x - self.frame.width, y: middleBoxPosition.y)
@@ -159,7 +159,7 @@ class MenuScene: SKScene {
     private func create(shopBox: ShopBox,atPos pos: CGPoint,animate: Bool) {
         
         let size = boxSize
-        let box = Box(size: size)
+        let box = Box(size: size,imageNamed: shopBox.name)
         box.position = pos
         displayBoxesNode.addChild(box)
         
@@ -167,7 +167,7 @@ class MenuScene: SKScene {
             self.animate(box: box)
         }
         
-        if equipedBoxName != shopBox.name {
+        if shopBox.locked == true {
             
             let buttonSize = CGSize(width: boxSize.width, height: boxSize.width / 3)
             let button = SKSpriteNode(color: .red, size: buttonSize)
@@ -380,14 +380,35 @@ extension MenuScene {
     private func createShopBoxes() {
         if shopBoxes.count != 0 {return}
         
-        let shopBox1 = ShopBox(name: "Normal Box", price: 100, locked: false)
+        let shopBox1 = ShopBox(name: "box", price: 100, locked: false)
         shopBoxes.append(shopBox1)
         
-        let shopBox2 = ShopBox(name: "Right Box", price: 200, locked: checkIfLockedFor(key: "Right Box"))
+        let shopBox2 = ShopBox(name: "treasure-chest", price: 200, locked: checkIfLockedFor(key: "treasure-box"))
         shopBoxes.append(shopBox2)
         
-        let shopBox3 = ShopBox(name: "Far Right Box", price: 300, locked: checkIfLockedFor(key: "Far Right Box"))
+        let shopBox3 = ShopBox(name: "wooden-box", price: 300, locked: checkIfLockedFor(key: "wooden-box"))
         shopBoxes.append(shopBox3)
+        
+        let shopBox4 = ShopBox(name: "toaster", price: 300, locked: checkIfLockedFor(key: "toaster"))
+        shopBoxes.append(shopBox4)
+        
+        let shopBox5 = ShopBox(name: "safe", price: 300, locked: checkIfLockedFor(key: "safe"))
+        shopBoxes.append(shopBox5)
+        
+        let shopBox6 = ShopBox(name: "cactus", price: 300, locked: checkIfLockedFor(key: "cactus"))
+        shopBoxes.append(shopBox6)
+        
+        makeActiveBoxDefault()
+    }
+    
+    //makes sure the equipped box is displayed instead of the first in the array
+    func makeActiveBoxDefault() {
+        for i in 0...shopBoxes.count - 1 {
+            if shopBoxes[i].name == equipedBoxName {
+                activeBox = i
+                return
+            }
+        }
     }
     
     

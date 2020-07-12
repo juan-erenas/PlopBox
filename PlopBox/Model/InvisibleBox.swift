@@ -13,8 +13,8 @@ class InvisibleBox : Box {
     private var alreadyTurnedRed = false
     private var target = SKSpriteNode()
     
-    override init(size: CGSize) {
-        super.init(size: size)
+    init(size: CGSize) {
+        super.init(size: size, imageNamed: "")
         configureBox()
         self.texture = .none
     }
