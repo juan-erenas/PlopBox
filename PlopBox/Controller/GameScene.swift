@@ -34,6 +34,7 @@ class GameScene: SKScene {
     private var moneyLabel : SKLabelNode!
     
     private var audioManager = AudioManger()
+    private var userPrefersNoVibration = UserDefaults.standard.bool(forKey: "prefers-no-vibration")
     
     var gameRestarted = false
     
@@ -265,6 +266,10 @@ class GameScene: SKScene {
         if let label = scoreLabel {
             updateNumberFor(label: label, toNumber: "\(self.currentScore)")
         }
+        
+        if currentScore == 10 && canRetry == true {
+            NotificationCenter.default.post(name: Notification.Name(rawValue: "BeginLoadingAd"), object: self)
+        }
     }
     
     func addMoney() {
@@ -346,8 +351,10 @@ class GameScene: SKScene {
             self.boxSet.speedUpBoxes()
             self.shootingBox.currentlyShooting = false
             
-            let generator = UIImpactFeedbackGenerator(style: .medium)
-            generator.impactOccurred()
+            if self.userPrefersNoVibration == false {
+                let generator = UIImpactFeedbackGenerator(style: .medium)
+                generator.impactOccurred()
+            }
             
         }
         
@@ -384,8 +391,8 @@ class GameScene: SKScene {
     
     func shakeCamera(layer:SKNode, duration:Float) {
         
-        let amplitudeX:Float = 6;
-        let amplitudeY:Float = 1;
+        let amplitudeX:Float = 8;
+        let amplitudeY:Float = 0;
         let numberOfShakes = duration / 0.04;
         var actionsArray:[SKAction] = [];
         for _ in 1...Int(numberOfShakes) {
@@ -414,31 +421,7 @@ class GameScene: SKScene {
             emitter.run(sequence)
         }
     }
-    
-    // MARK: - Sound Handler
 
-    //doesn't work
-    func playSound(withName name: String, andExtension nameExtention: String) {
-        guard let url = Bundle.main.url(forResource: name, withExtension: nameExtention) else { return }
-
-        do {
-            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
-            try AVAudioSession.sharedInstance().setActive(true)
-
-            /* The following line is required for the player to work on iOS 11. Change the file type accordingly*/
-            player = try AVAudioPlayer(contentsOf: url, fileTypeHint: AVFileType.mp3.rawValue)
-
-            /* iOS 10 and earlier require the following line:
-            player = try AVAudioPlayer(contentsOf: url, fileTypeHint: AVFileTypeMPEGLayer3) */
-
-            guard let player = player else { return }
-
-            player.play()
-
-        } catch let error {
-            print(error.localizedDescription)
-        }
-    }
     
     
     // MARK: - Game Over Handler
@@ -451,8 +434,7 @@ class GameScene: SKScene {
         view?.removeGestureRecognizer(tap)
         
         NotificationCenter.default.post(name: Notification.Name(rawValue: "StopBackgroundSound"), object: self)
-        
-        //add code to go to game over screen
+    
         let wait = SKAction.wait(forDuration: 1)
         
         //decides if you should get a chance to retry
@@ -487,7 +469,7 @@ class GameScene: SKScene {
     
     func makeBoxesFall() {
         physicsWorld.gravity = CGVector(dx: 0.0, dy: -9.8)
-        shakeCamera(layer: worldNode, duration: 0.3)
+        shakeCamera(layer: leftNode, duration: 0.3)
         
         for box in boxSet.children {
             box.physicsBody?.isDynamic = true

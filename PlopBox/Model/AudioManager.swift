@@ -20,6 +20,7 @@ class AudioManger : NSObject {
     
     var audioPlayerArray : [AVAudioPlayer?] = []
     let audioPlayerResourceNames = ["woosh","impact", "perfect", "awesome", "good"]
+    let userPrefersNoSound = UserDefaults.standard.bool(forKey: "prefers-no-sound")
     
     
     enum PlayerSounds {
@@ -61,6 +62,8 @@ class AudioManger : NSObject {
     
     
     func play(sound soundName: PlayerSounds) {
+        
+        if userPrefersNoSound {return}
         
         switch soundName {
 

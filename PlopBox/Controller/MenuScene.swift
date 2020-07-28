@@ -29,11 +29,16 @@ class MenuScene: SKScene {
     private var shopBoxes = [ShopBox]()
     private var equipedBoxName = KeychainWrapper.standard.string(forKey: "equipped-box")
     
+    private var settings = SKSpriteNode()
+    private var settingsNode = SKNode()
+    
     var dimPanel : SKSpriteNode?
     
     override func didMove(to view: SKView) {
         
         setDefualts()
+        
+        menuNode.addChild(settingsNode)
         
         menuNode.addChild(displayBoxesNode)
         originalNodePosition = displayBoxesNode.position
@@ -56,7 +61,7 @@ class MenuScene: SKScene {
         addLabels()
         performIntroAnimation()
         
-        NotificationCenter.default.post(name: Notification.Name(rawValue: "PlayBackgroundSoundLow"), object: self)
+        turnOnMusic()
         
     }
     
@@ -69,6 +74,7 @@ class MenuScene: SKScene {
         if KeychainWrapper.standard.string(forKey: "equipped-box") == nil {
             KeychainWrapper.standard.set("box", forKey: "equipped-box")
         }
+        
     }
     
     func addLabels() {
@@ -94,7 +100,6 @@ class MenuScene: SKScene {
         recentScoreLabel.position = CGPoint(x: frame.midX, y: highscoreLabel.position.y - recentScoreLabel.frame.size.height*2)
         menuNode.addChild(recentScoreLabel)
         
-        
         let playLabel = SKLabelNode(text: "- tap to play -")
         playLabel.fontName = "Marsh-Stencil"
         playLabel.fontSize = 30.0
@@ -103,11 +108,11 @@ class MenuScene: SKScene {
         menuNode.addChild(playLabel)
         animate(label: playLabel)
         
-        let settings = SKSpriteNode(imageNamed: "gear")
-        settings.size = CGSize(width: 30.0, height: 30.0)
+        settings = SKSpriteNode(imageNamed: "gear")
+        settings.size = CGSize(width: 40.0, height: 40.0)
         settings.color = UIColor(red: 80/255, green: 95/255, blue: 103/255, alpha: 1)
         settings.colorBlendFactor = 1
-        settings.position = CGPoint(x: frame.minX + 30, y: frame.maxY - 30)
+        settings.position = CGPoint(x: frame.minX + 40, y: frame.maxY - 40)
         menuNode.addChild(settings)
         
         let coin = SKSpriteNode(imageNamed: "Coin")
@@ -296,8 +301,21 @@ class MenuScene: SKScene {
     //MARK: - Exit Scene Animations
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        
+        //Checks if settings button has been clicked
+        if let touch = touches.first?.location(in: self) {
+            
+            if settingsNode.children.count > 0 {
+                userClickedOnSettingsMenuAt(point: touch)
+                return
+            } else if settings.contains(touch) {
+                settingsButtonClicked()
+                return
+            }
+        }
+        
+        //else start game
         performExitAnimation(AndGoTo: .gameScene)
-//        goToGameScene()
         
     }
     
@@ -368,9 +386,138 @@ class MenuScene: SKScene {
         let gameScene = GameScene(size: self.view!.bounds.size)
         self.view!.presentScene(gameScene)
     }
+ 
+    //MARK: - Settings Handler
     
+    func settingsButtonClicked() {
+        
+        settings.alpha = 0
+        
+        let dimScreen = SKSpriteNode(color: .black, size: self.frame.size)
+        dimScreen.position = CGPoint(x: self.frame.midX, y: self.frame.midY)
+        dimScreen.name = "dim screen"
+        dimScreen.zPosition = 1
+        dimScreen.alpha = 0.7
+        settingsNode.addChild(dimScreen)
+        
+        let spacing = settings.size.height * 1.7
+        
+        let initalSize = CGSize(width: 1, height: 1)
+        let arrowInitialSize = CGSize(width: 1, height: 0.5)
+        
+        let upArrowButton = SettingsButton(buttonType: .arrowButton, initialSize: arrowInitialSize, fullSize: settings.size)
+        upArrowButton.position = settings.position
+        upArrowButton.name = "up arrow"
+        settingsNode.addChild(upArrowButton)
+        
+        let musicButton = SettingsButton(buttonType: .musicButton, initialSize: initalSize, fullSize: settings.size)
+        musicButton.position = CGPoint(x: settings.position.x, y: upArrowButton.position.y - spacing)
+        musicButton.name = "music button"
+        settingsNode.addChild(musicButton)
+        
+        let sfxButton = SettingsButton(buttonType: .soundButton, initialSize: initalSize, fullSize: settings.size)
+        sfxButton.position = CGPoint(x: settings.position.x, y: musicButton.position.y - spacing)
+        sfxButton.name = "sound button"
+        settingsNode.addChild(sfxButton)
+        
+        let ratingsButton = SettingsButton(buttonType: .ratingsButton, initialSize: initalSize, fullSize: settings.size)
+        ratingsButton.position = CGPoint(x: settings.position.x, y: sfxButton.position.y - spacing)
+        ratingsButton.name = "ratings button"
+        settingsNode.addChild(ratingsButton)
+        
+        let vibrationsButton = SettingsButton(buttonType: .vibrationButton, initialSize: initalSize, fullSize: settings.size)
+        vibrationsButton.position = CGPoint(x: settings.position.x, y: ratingsButton.position.y - spacing)
+        vibrationsButton.name = "vibrations button"
+        settingsNode.addChild(vibrationsButton)
+        
+        var delay : Double = 0
+        
+        for child in settingsNode.children {
+            if child.name == "dim screen" {continue}
+            
+            if let child = child as? SettingsButton {
+                
+                let wait = SKAction.wait(forDuration: delay)
+                let runButtonAnimation = SKAction.customAction(withDuration: 0) { (_, _) in
+                    //run animation code
+                    child.playGrowAnimation()
+                }
+                
+                let sequence = SKAction.sequence([wait,runButtonAnimation])
+                child.run(sequence)
+                
+                delay += 0.05
+            }
+            
+        }
+        
+    }
+    
+    func removeSettingsNode() {
+        
+        settingsNode.removeAllChildren()
+        
+        let minimize = SKAction.scale(to: 0, duration: 0)
+        let appear = SKAction.fadeAlpha(to: 1, duration: 0)
+        let grow = SKAction.scale(to: 1.2, duration: 0.1)
+        let shrink = SKAction.scale(to: 0.8, duration: 0.08)
+        let normal = SKAction.scale(to: 1, duration: 0.06)
+        
+        grow.timingMode = .easeOut
+        shrink.timingMode = .easeInEaseOut
+        normal.timingMode = .easeIn
+        
+        let sequence = SKAction.sequence([minimize,appear,grow,shrink,normal])
+        settings.run(sequence)
+        
+    }
+    
+    func userClickedOnSettingsMenuAt(point: CGPoint) {
+        
+        let frontTouchedNode = atPoint(point)
+        
+        switch frontTouchedNode.name {
+        case "music button":
+            let musicButton = frontTouchedNode as! SettingsButton
+            musicButton.buttonClicked()
+            if musicButton.hasBeenClicked {
+                turnOffMusic()
+            } else {
+                turnOnMusic()
+            }
+        case "sound button":
+            let soundButton = frontTouchedNode as! SettingsButton
+            soundButton.buttonClicked()
+        case "ratings button":
+            pressed(ratingsButton: frontTouchedNode as! SettingsButton)
+        case "vibrations button":
+            let vibrationButton = frontTouchedNode as! SettingsButton
+            vibrationButton.buttonClicked()
+        default:
+            removeSettingsNode()
+        }
+        
+    }
+    
+    private func pressed(ratingsButton: SettingsButton) {
+        ratingsButton.playGrowAnimation()
+        print("pressed ratings button")
+    }
+    
+    
+    
+    
+    
+    //MARK: - Music Handler
+    
+    private func turnOnMusic() {
+        NotificationCenter.default.post(name: Notification.Name(rawValue: "PlayBackgroundSoundLow"), object: self)
+    }
+    
+    private func turnOffMusic() {
+        NotificationCenter.default.post(name: Notification.Name(rawValue: "StopBackgroundSound"), object: self)
+    }
 }
-
 
 
 //MARK: - Create Shop Boxes

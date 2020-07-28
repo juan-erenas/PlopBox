@@ -13,6 +13,7 @@
 		442CAC0324B386A4009E8E97 /* woosh.wav in Resources */ = {isa = PBXBuildFile; fileRef = 442CAC0224B386A4009E8E97 /* woosh.wav */; };
 		442CAC0724B398E9009E8E97 /* impact.wav in Resources */ = {isa = PBXBuildFile; fileRef = 442CAC0624B398E9009E8E97 /* impact.wav */; };
 		443AA279248312F3005A9647 /* Marsh-Stencil.otf in Resources */ = {isa = PBXBuildFile; fileRef = 443AA278248312F2005A9647 /* Marsh-Stencil.otf */; };
+		444061E924CAAE30001C572C /* SettingsButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 444061E824CAAE30001C572C /* SettingsButton.swift */; };
 		444F964B249B386B001C205A /* PrecisionLabelPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 444F964A249B386B001C205A /* PrecisionLabelPanel.swift */; };
 		44558F59247F9BEF00CB85E5 /* GameOverScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44558F58247F9BEF00CB85E5 /* GameOverScene.swift */; };
 		4467EC6F2473634E00BDAA4D /* BoxSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4467EC6E2473634E00BDAA4D /* BoxSet.swift */; };
@@ -45,6 +46,7 @@
 		442CAC0224B386A4009E8E97 /* woosh.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = woosh.wav; sourceTree = "<group>"; };
 		442CAC0624B398E9009E8E97 /* impact.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = impact.wav; sourceTree = "<group>"; };
 		443AA278248312F2005A9647 /* Marsh-Stencil.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Marsh-Stencil.otf"; sourceTree = "<group>"; };
+		444061E824CAAE30001C572C /* SettingsButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsButton.swift; sourceTree = "<group>"; };
 		444F964A249B386B001C205A /* PrecisionLabelPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrecisionLabelPanel.swift; sourceTree = "<group>"; };
 		44558F58247F9BEF00CB85E5 /* GameOverScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameOverScene.swift; sourceTree = "<group>"; };
 		4467EC6E2473634E00BDAA4D /* BoxSet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoxSet.swift; sourceTree = "<group>"; };
@@ -168,6 +170,7 @@
 				444F964A249B386B001C205A /* PrecisionLabelPanel.swift */,
 				44F3BAEB248C328D000A5CA4 /* ShopBox.swift */,
 				44040F7A24ABC6000097C0B5 /* ShopBoxDisplay.swift */,
+				444061E824CAAE30001C572C /* SettingsButton.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -321,6 +324,7 @@
 				44040F7B24ABC6000097C0B5 /* ShopBoxDisplay.swift in Sources */,
 				44F3BAEC248C328D000A5CA4 /* ShopBox.swift in Sources */,
 				44FECD54247321E100805D0F /* GameScene.swift in Sources */,
+				444061E924CAAE30001C572C /* SettingsButton.swift in Sources */,
 				4467EC7124736C7000BDAA4D /* Box.swift in Sources */,
 				4467EC7324736F2500BDAA4D /* Settings.swift in Sources */,
 				4471AB8D24B057C5007E6B45 /* AudioManager.swift in Sources */,

@@ -7,12 +7,16 @@
 //
 
 import SpriteKit
+import GoogleMobileAds
 
 class GameOverScene : SKScene {
     
     
     var currentScore = 0
     var moveBoxDuration : CGFloat = 0
+    
+    private var countDownNumberLabel : SKLabelNode!
+    
     private var countDown = 5
     private var worldNode = SKNode()
     private var skipLabel = SKLabelNode()
@@ -25,7 +29,11 @@ class GameOverScene : SKScene {
         addCountDown()
         
         backgroundColor = UIColor.black
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(GameOverScene.adFinishedPlaying(_:)), name: NSNotification.Name(rawValue: "AdFinishedPlaying"), object: nil)
     }
+    
+
     
     func addButtons() {
         
@@ -37,7 +45,6 @@ class GameOverScene : SKScene {
         worldNode.addChild(yesButton)
         
         animate(node: yesButton)
-        
         
     }
     
@@ -64,16 +71,16 @@ class GameOverScene : SKScene {
     }
     
     func addCountDown() {
-        let countDownNumber = SKLabelNode(text: "\(countDown)")
-        countDownNumber.fontName = "Marsh-Stencil"
-        countDownNumber.fontSize = 50.0
-        countDownNumber.fontColor = UIColor.white
-        countDownNumber.position = CGPoint(x: frame.midX, y: frame.midY + frame.height/4)
-        countDownNumber.horizontalAlignmentMode = .center
-        countDownNumber.verticalAlignmentMode = .center
-        worldNode.addChild(countDownNumber)
+        countDownNumberLabel = SKLabelNode(text: "\(countDown)")
+        countDownNumberLabel.fontName = "Marsh-Stencil"
+        countDownNumberLabel.fontSize = 50.0
+        countDownNumberLabel.fontColor = UIColor.white
+        countDownNumberLabel.position = CGPoint(x: frame.midX, y: frame.midY + frame.height/4)
+        countDownNumberLabel.horizontalAlignmentMode = .center
+        countDownNumberLabel.verticalAlignmentMode = .center
+        worldNode.addChild(countDownNumberLabel)
         print("added count")
-        shrink(countDownNumber: countDownNumber)
+        shrink(countDownNumber: countDownNumberLabel)
     }
     
     func shrink(countDownNumber: SKLabelNode) {
@@ -125,9 +132,16 @@ class GameOverScene : SKScene {
         node.run(SKAction.repeatForever(sequence))
     }
     
-    @objc func returnToGame() {
 
-        let gameScene = GameScene(size: self.view!.bounds.size)
+    
+    @objc func returnToGame() {
+        
+        guard let view = self.view else {
+            print("view was nil")
+            return
+        }
+
+        let gameScene = GameScene(size: view.bounds.size)
         gameScene.currentScore = self.currentScore
         gameScene.gameRestarted = true
         gameScene.moveBoxDuration = moveBoxDuration
@@ -142,6 +156,30 @@ class GameOverScene : SKScene {
         
     }
     
+    @objc func adFinishedPlaying(_ notification : NSNotification) {
+        print("Ad finished playing was called!")
+        if let dict = notification.userInfo as NSDictionary? {
+            if let successfullyCompleted = dict["completionOutcome"] as? Bool {
+               
+                if successfullyCompleted == true {
+                    returnToGame()
+                } else {
+                    returnToMainMenu()
+                }
+                
+            }
+        }
+    }
+    
+    func stopCountDown() {
+        countDownNumberLabel.removeAllActions()
+        
+        let whiteCoverScreen = SKSpriteNode(color: .white, size: self.frame.size)
+        whiteCoverScreen.position = CGPoint(x: self.frame.midX, y: self.frame.midY)
+        whiteCoverScreen.zPosition = 100
+        self.addChild(whiteCoverScreen)
+    }
+    
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         let touch = touches.first!.location(in: self)
@@ -151,7 +189,8 @@ class GameOverScene : SKScene {
         }
         
         if yesButton.frame.contains(touch) {
-            returnToGame()
+            NotificationCenter.default.post(name: Notification.Name(rawValue: "PlayAd"), object: self)
+            stopCountDown()
         }
         
         
