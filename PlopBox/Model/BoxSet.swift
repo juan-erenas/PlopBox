@@ -227,9 +227,9 @@ class BoxSet : SKNode {
         box.anchorPoint = CGPoint(x: 0, y: 0.5)
         let originalWidth = box.size.width
         
-        let compress = SKAction.resize(toWidth: originalWidth * 0.7, duration: 0.1)
-        let expand = SKAction.resize(toWidth: originalWidth * 1.2, duration: 0.1)
-        let resetWidth = SKAction.resize(toWidth: originalWidth, duration: 0.1)
+        let compress = SKAction.resize(toWidth: originalWidth * 0.7, duration: 0.07)
+        let expand = SKAction.resize(toWidth: originalWidth * 1.2, duration: 0.05)
+        let resetWidth = SKAction.resize(toWidth: originalWidth, duration: 0.04)
         
         let sequence = SKAction.sequence([compress,expand,resetWidth])
         box.run(sequence)

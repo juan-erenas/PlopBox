@@ -28,7 +28,6 @@ class InvisibleBox : Box {
         let size = CGSize(width: self.size.width , height: self.size.height)
         
         self.anchorPoint = CGPoint(x: 0, y: 0.5)
-        let center = CGPoint(x: self.position.x + self.size.width/2, y: self.position.y)
         self.physicsBody = SKPhysicsBody(rectangleOf: size)
         self.physicsBody?.categoryBitMask = PhysicsCategories.invisibleBox
         self.physicsBody?.contactTestBitMask = PhysicsCategories.none
@@ -36,7 +35,7 @@ class InvisibleBox : Box {
         self.physicsBody?.isDynamic = false
         
         self.name = "invisible box"
-        self.zPosition = -10
+        self.zPosition = 0
     }
     
     func createTarget() {
