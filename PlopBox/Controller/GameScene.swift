@@ -170,13 +170,13 @@ class GameScene: SKScene {
     func addBoxSet() {
         let xPos = self.frame.minX + shootingBox.size.width - shootingBox.size.width/2
         let shootPoint = CGPoint(x: xPos, y: shootingBox.position.y)
-        boxSet = BoxSet(height: self.frame.height, position: CGPoint(x: xPos, y: self.frame.midY),shootPoint: shootPoint,boxName: equipedBoxName!)
+        boxSet = BoxSet(screenSize: self.frame, position: CGPoint(x: xPos, y: self.frame.midY),shootPoint: shootPoint,boxName: equipedBoxName!)
         leftNode.addChild(boxSet)
         boxSet.delegate = self
     }
     
     func addShootingBox() {
-        let size = (0.8 * self.frame.height) / 8
+        let size = self.frame.width / 5.5
         
         let fourthOfWidth = self.frame.width/4
         let fourthOfHeight = self.frame.height/4
@@ -495,6 +495,8 @@ class GameScene: SKScene {
         let highScore = KeychainWrapper.standard.integer(forKey: "high-score") ?? 0
         if currentScore >= highScore {
             KeychainWrapper.standard.set(currentScore, forKey: "high-score")
+            let scoreDict = ["newScore" : Int64(currentScore)]
+            NotificationCenter.default.post(name: Notification.Name(rawValue: "SubmitNewScore"), object: self,userInfo: scoreDict)
         }
     }
 }

@@ -30,11 +30,17 @@ class MenuScene: SKScene {
     private var equipedBoxName = KeychainWrapper.standard.string(forKey: "equipped-box")
     
     private var settings = SKSpriteNode()
+    private var leaderboardIcon = SKSpriteNode()
     private var settingsNode = SKNode()
+    private var noAdsButton = SKSpriteNode()
+    
+    private var texturesArePreloaded = false
     
     var dimPanel : SKSpriteNode?
     
     override func didMove(to view: SKView) {
+        
+        backgroundColor = UIColor.white
         
         setDefualts()
         
@@ -54,14 +60,19 @@ class MenuScene: SKScene {
         view.addGestureRecognizer(swipeLeft)
         
         createBackground()
-            
+        
         addChild(menuNode)
         
-        backgroundColor = UIColor.white
         addLabels()
         performIntroAnimation()
         
         turnOnMusic()
+        
+        preloadTextures()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(GameViewController.buyProduct), name: NSNotification.Name(rawValue: "GrayOutNoAdsButton"), object: nil)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(GameViewController.buyProduct), name: NSNotification.Name(rawValue: "RemoveNoAdsButtton"), object: nil)
         
     }
     
@@ -115,6 +126,20 @@ class MenuScene: SKScene {
         settings.position = CGPoint(x: frame.minX + 40, y: frame.maxY - 40)
         menuNode.addChild(settings)
         
+        leaderboardIcon = SKSpriteNode(imageNamed: "trophy")
+        leaderboardIcon.size = CGSize(width: 40.0, height: 40.0)
+        leaderboardIcon.color = UIColor(red: 80/255, green: 95/255, blue: 103/255, alpha: 1)
+        leaderboardIcon.colorBlendFactor = 1
+        leaderboardIcon.position = CGPoint(x: settings.position.x, y: settings.position.y - settings.size.height * 1.5)
+        menuNode.addChild(leaderboardIcon)
+        
+        noAdsButton = SKSpriteNode(imageNamed: "trophy")
+        noAdsButton.size = CGSize(width: 40.0, height: 40.0)
+        noAdsButton.color = UIColor(red: 80/255, green: 95/255, blue: 103/255, alpha: 1)
+        noAdsButton.colorBlendFactor = 1
+        noAdsButton.position = CGPoint(x: leaderboardIcon.position.x, y: leaderboardIcon.position.y - leaderboardIcon.size.height * 1.5)
+        menuNode.addChild(noAdsButton)
+        
         let coin = SKSpriteNode(imageNamed: "Coin")
         coin.size = CGSize(width: 30.0, height: 30.0)
         coin.color = UIColor.white
@@ -164,7 +189,7 @@ class MenuScene: SKScene {
     private func create(shopBox: ShopBox,atPos pos: CGPoint,animate: Bool) {
         
         let size = boxSize
-        let box = Box(size: size,imageNamed: shopBox.name)
+        let box = Box(size: size,imageNamed: shopBox.name,texture: SKTexture(imageNamed: shopBox.name))
         box.position = pos
         displayBoxesNode.addChild(box)
         
@@ -311,6 +336,12 @@ class MenuScene: SKScene {
             } else if settings.contains(touch) {
                 settingsButtonClicked()
                 return
+            } else if leaderboardIcon.contains(touch) {
+                NotificationCenter.default.post(name: Notification.Name(rawValue: "ShowLeaderboards"), object: self)
+                return
+            } else if noAdsButton.contains(touch)  {
+                NotificationCenter.default.post(name: Notification.Name(rawValue: "BuyNoAds"), object: self)
+                return
             }
         }
         
@@ -352,6 +383,18 @@ class MenuScene: SKScene {
 
         let sequence = SKAction.sequence([moveUp,moveDown,wait,presentScene])
         menuNode.run(sequence)
+    }
+    
+    func preloadTextures() {
+        let boxTexture = SKTexture(imageNamed: KeychainWrapper.standard.string(forKey: "equipped-box") ?? "")
+        
+        let textureArray = [SKTexture(imageNamed: "Box-Holder"),boxTexture,SKTexture(imageNamed: "box-target"),SKTexture(imageNamed: "box-outline"),SKTexture(imageNamed: "Conveyor-Belt")]
+        
+        SKTexture.preload(textureArray) {
+            self.texturesArePreloaded = true
+        }
+        
+        
     }
     
     func createFlash(andFade fade: Bool) {
@@ -504,8 +547,13 @@ class MenuScene: SKScene {
         print("pressed ratings button")
     }
     
+    private func grayOutNoAdsButton() {
+        noAdsButton.color = .gray
+    }
     
-    
+    private func removeNoAdsButton() {
+        noAdsButton.removeFromParent()
+    }
     
     
     //MARK: - Music Handler

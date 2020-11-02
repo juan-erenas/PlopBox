@@ -8,6 +8,7 @@
 
 import SpriteKit
 import GoogleMobileAds
+import SwiftKeychainWrapper
 
 class GameOverScene : SKScene {
     
@@ -132,6 +133,23 @@ class GameOverScene : SKScene {
         node.run(SKAction.repeatForever(sequence))
     }
     
+    func preloadTextures() {
+        let boxTexture = SKTexture(imageNamed: KeychainWrapper.standard.string(forKey: "equipped-box") ?? "")
+        
+        let textureArray = [
+            SKTexture(imageNamed: "Box-Holder"),
+            boxTexture,
+            SKTexture(imageNamed: "box-target"),
+            SKTexture(imageNamed: "box-outline"),
+            SKTexture(imageNamed: "Conveyor-Belt"),
+            SKTexture(imageNamed: "backf-background-boxes"),
+            SKTexture(imageNamed: "front-background-boxes")
+        ]
+        
+        SKTexture.preload(textureArray) {
+        }
+    }
+    
 
     
     @objc func returnToGame() {
@@ -150,10 +168,10 @@ class GameOverScene : SKScene {
     }
     
     func returnToMainMenu() {
+        guard let currentView = self.view else {return}
         
-        let menuScene = MenuScene(size: self.view!.bounds.size)
+        let menuScene = MenuScene(size: currentView.bounds.size)
         self.view!.presentScene(menuScene)
-        
     }
     
     @objc func adFinishedPlaying(_ notification : NSNotification) {
@@ -189,6 +207,7 @@ class GameOverScene : SKScene {
         }
         
         if yesButton.frame.contains(touch) {
+            preloadTextures()
             NotificationCenter.default.post(name: Notification.Name(rawValue: "PlayAd"), object: self)
             stopCountDown()
         }

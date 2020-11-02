@@ -14,7 +14,7 @@ class InvisibleBox : Box {
     private var target = SKSpriteNode()
     
     init(size: CGSize) {
-        super.init(size: size, imageNamed: "")
+        super.init(size: size, imageNamed: "",texture: SKTexture())
         configureBox()
         self.texture = .none
     }
@@ -35,7 +35,7 @@ class InvisibleBox : Box {
         self.physicsBody?.isDynamic = false
         
         self.name = "invisible box"
-        self.zPosition = 0
+        self.zPosition = -1
     }
     
     func createTarget() {

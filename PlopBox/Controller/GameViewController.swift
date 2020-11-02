@@ -9,6 +9,7 @@
 import UIKit
 import SpriteKit
 import GameplayKit
+import GameKit
 import AVFoundation
 import GoogleMobileAds
 
@@ -25,9 +26,16 @@ class GameViewController: UIViewController {
     let speedControl = AVAudioUnitVarispeed()
     let pitchControl = AVAudioUnitTimePitch()
     let audioPlayer = AVAudioPlayerNode()
+    
+    var products: [SKProduct] = []
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        authenticateUser()
+        
+        loadProducts()
+        
         
         if let view = self.view as! SKView? {
             // Load the SKScene from 'GameScene.sks'
@@ -36,24 +44,40 @@ class GameViewController: UIViewController {
             // Set the scale mode to scale to fit the window
             scene.scaleMode = .aspectFill
             
-            // Present the scene
-            view.presentScene(scene)
-            
-            
+            preloadTexturesAndPresent(scene: scene, inView: view)
+        
             view.ignoresSiblingOrder = true
             
             view.showsFPS = true
             view.showsNodeCount = true
 //            view.showsPhysics = true
             
-            configureAudioPlayer()
             
             //initializes mobile ads
             GADMobileAds.sharedInstance().start { (_) in
 //                self.prepareBannerAd()
             }
-            
         }
+    }
+    
+    func preloadTexturesAndPresent(scene: SKScene, inView view: SKView) {
+        
+        let texturesArray : [SKTexture] = [
+            SKTexture(imageNamed: "back-background-boxes"),
+            SKTexture(imageNamed: "Coin"),
+            SKTexture(imageNamed: "front-background-boxes"),
+            SKTexture(imageNamed: "gear"),
+            SKTexture(imageNamed: "plop-box-logo")
+        ]
+        
+        SKTexture.preload(texturesArray) {
+        
+            view.presentScene(scene)
+            
+            self.configureAudioPlayer()
+        }
+        
+        
     }
     
     //MARK: - Audio Handler
@@ -70,6 +94,12 @@ class GameViewController: UIViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(GameViewController.prepareRewardAd), name: NSNotification.Name(rawValue: "BeginLoadingAd"), object: nil)
         
         NotificationCenter.default.addObserver(self, selector: #selector(GameViewController.playAd), name: NSNotification.Name(rawValue: "PlayAd"), object: nil)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(GameViewController.showLeaderboards), name: NSNotification.Name(rawValue: "ShowLeaderboards"), object: nil)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(GameViewController.submitNewScore(_:)), name: NSNotification.Name(rawValue: "SubmitNewScore"), object: nil)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(GameViewController.buyProduct), name: NSNotification.Name(rawValue: "BuyNoAds"), object: nil)
         
         //create a URL variable using the name variable and tacking on the "mp3" extension
         let fileURL:URL = Bundle.main.url(forResource:"Hadouken", withExtension: "mp3")!
@@ -280,4 +310,126 @@ extension GameViewController : GADRewardedAdDelegate {
     func rewardedAd(_ rewardedAd: GADRewardedAd, didFailToPresentWithError error: Error) {
         
     }
+}
+
+
+extension GameViewController : GKGameCenterControllerDelegate {
+
+  private func authenticateUser() {
+    let player = GKLocalPlayer.local
+
+    player.authenticateHandler = { vc, error in
+      guard error == nil else {
+        print(error?.localizedDescription ?? "")
+        return
+      }
+
+      if let vc = vc {
+        self.present(vc, animated: true, completion: nil)
+      }
+    }
+
+  }
+
+  private func showAchievements() {
+    let vc = GKGameCenterViewController()
+    vc.gameCenterDelegate = self
+    vc.viewState = .achievements
+    present(vc, animated: true, completion: nil)
+  }
+
+  @objc private func showLeaderboards() {
+    let vc = GKGameCenterViewController()
+    vc.gameCenterDelegate = self
+    vc.viewState = .leaderboards
+    vc.leaderboardIdentifier = "PlopBoxLeaderBoard"
+    present(vc, animated: true, completion: nil)
+  }
+
+  private func unlockAchievement() {
+    let achievement = GKAchievement(identifier: "finished800level")
+    achievement.percentComplete = 100
+    achievement.showsCompletionBanner = true
+    GKAchievement.report([achievement]) { error in
+      guard error == nil else {
+        print(error?.localizedDescription ?? "")
+        return
+      }
+      print("done!")
+    }
+  }
+
+  @objc private func submitNewScore(_ notification : NSNotification) {
+    let score = GKScore(leaderboardIdentifier: "PlopBoxLeaderBoard")
+    
+    if let dict = notification.userInfo as NSDictionary? {
+        if let newScore = dict["newScore"] as? Int64 {
+            
+            score.value = newScore
+            
+            GKScore.report([score]) { error in
+              guard error == nil else {
+                print(error?.localizedDescription ?? "")
+                return
+              }
+              print("done!")
+            }
+            
+            
+        }
+    }
+  }
+    
+    func gameCenterViewControllerDidFinish(_ gameCenterViewController: GKGameCenterViewController) {
+       gameCenterViewController.dismiss(animated: true, completion: nil)
+     }
+    
+    
+}
+ //MARK: IAP Handler
+extension GameViewController {
+    
+    func loadProducts() {
+        
+        //If iPhone cannot make payments, do not request products
+        if !IAPHelper.canMakePayments() {
+            NotificationCenter.default.post(name: Notification.Name(rawValue: "GrayOutNoAdsButtton"), object: self)
+            return
+        }
+        
+        PlopBoxProducts.store.requestProducts{ [weak self] success, products in
+          guard let self = self else { return }
+          if success {
+            self.products = products!
+            self.checkIfPurchased()
+          } else {
+            NotificationCenter.default.post(name: Notification.Name(rawValue: "GrayOutNoAdsButtton"), object: self)
+            }
+        }
+    }
+    
+    func checkIfPurchased() {
+        if products.count == 0 {return}
+        let product = products[0]
+        let purchased = PlopBoxProducts.store.isProductPurchased(product.productIdentifier)
+        
+        if purchased {
+            //add code to alert menu scene to remove ads button
+            NotificationCenter.default.post(name: Notification.Name(rawValue: "RemoveNoAdsButtton"), object: self)
+        }
+    }
+    
+    @objc func buyProduct() {
+        print("products count is: \(products.count)")
+        if products.count > 0 {
+            PlopBoxProducts.store.buyProduct(products[0])
+        }
+    }
+    
+    func restorePurchases () {
+        
+    }
+    
+    
+    
 }
