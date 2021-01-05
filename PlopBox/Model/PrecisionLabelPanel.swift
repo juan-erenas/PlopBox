@@ -10,8 +10,8 @@ import SpriteKit
 
 class PrecisionLabelPanel : SKSpriteNode {
     
+    var animationDuration : Double
     private var precisionRating : PrecisionRating
-    private var animationDuration : Double
     private var label = SKLabelNode()
     
     init(size: CGSize, precisionRating: PrecisionRating,animationDuration: Double) {
@@ -27,14 +27,22 @@ class PrecisionLabelPanel : SKSpriteNode {
     }
     
     private func configureLabel() {
+        
+        //resize for iPads
+        var resizeRatio : CGFloat = 1
+        if self.size.height > 896 {
+            resizeRatio = self.frame.height / 896
+        }
+        
         label.name = "label"
         label.fontName = "Marsh-Stencil"
-        label.fontSize = 70.0
+        label.fontSize = 70.0 * resizeRatio
         label.fontColor = UIColor.white
         label.position = CGPoint(x: self.frame.midX, y: self.frame.midY)
         label.verticalAlignmentMode = .center
         label.horizontalAlignmentMode = .center
         label.zRotation = .pi/2
+        label.zPosition = 99
         self.addChild(label)
     }
     
@@ -42,7 +50,7 @@ class PrecisionLabelPanel : SKSpriteNode {
     private func configurePanel() {
         
         self.zPosition = -100
-        self.alpha = 0.8
+        self.alpha = 0
         
         switch precisionRating {
         case .perfect:
@@ -61,15 +69,11 @@ class PrecisionLabelPanel : SKSpriteNode {
         let lightYellow = UIColor(red: 259/255, green: 219/255, blue: 94/255, alpha: 1)
         self.color = lightYellow
         label.text = "PERFECT!"
-        
-        runAnimation()
     }
     
     private func configureAwesomeLabel() {
         self.color = UIColor(red: 137/255, green: 207/255, blue: 240/255, alpha: 1)
         label.text = "AWESOME!"
-        
-        runAnimation()
     }
     
     private func configureGoodLabel() {
@@ -83,17 +87,15 @@ class PrecisionLabelPanel : SKSpriteNode {
     private func configureMissedLabel() {
         self.color = .red
         label.text = "MISSED!"
-        
-        runAnimation()
     }
     
     
-    private func runAnimation() {
-        let fade = SKAction.fadeAlpha(to: 0, duration: animationDuration / 2 )
+    func runAnimation() {
+        self.alpha = 0.8
         let wait = SKAction.wait(forDuration: animationDuration / 2)
-        let removeFromParent = SKAction.removeFromParent()
-        let sequence = SKAction.sequence([wait,fade,removeFromParent])
+        let fade = SKAction.fadeAlpha(to: 0, duration: animationDuration / 2 )
 
+        let sequence = SKAction.sequence([wait,fade])
         self.run(sequence)
     }
 }

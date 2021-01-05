@@ -12,7 +12,6 @@ import SwiftKeychainWrapper
 
 class GameOverScene : SKScene {
     
-    
     var currentScore = 0
     var moveBoxDuration : CGFloat = 0
     
@@ -22,8 +21,30 @@ class GameOverScene : SKScene {
     private var worldNode = SKNode()
     private var skipLabel = SKLabelNode()
     private var yesButton = SKSpriteNode()
-    
+    private var continueLabel = SKLabelNode()
+    private var whiteCoverScreen = SKSpriteNode()
+    private var hasNoAdsPurchased = Bool()
+    private var errorPlayingAdExists = false
+    private var resizeRatio : CGFloat = 1
+
     override func didMove(to view: SKView) {
+        
+        if self.frame.height > 926 {
+            resizeRatio = self.frame.height / 896
+        }
+        
+        //Check if user has purchased no ads
+        hasNoAdsPurchased = KeychainWrapper.standard.bool(forKey: "com.buffthumbgames.plopbox.removeads") ?? false
+
+        //If they haven't purchased it, prepare the ads
+        if !hasNoAdsPurchased {
+            NotificationCenter.default.post(name: Notification.Name(rawValue: "BeginLoadingAd"), object: self)
+            //add an observer to know when the ad is done playing
+            NotificationCenter.default.addObserver(self, selector: #selector(GameOverScene.adFinishedPlaying(_:)), name: NSNotification.Name(rawValue: "AdFinishedPlaying"), object: nil)
+            
+            NotificationCenter.default.addObserver(self, selector: #selector(GameOverScene.errorPlayingAd), name: NSNotification.Name(rawValue: "CouldNotPlayAd"), object: nil)
+        }
+       
         self.addChild(worldNode)
         addButtons()
         addLabels()
@@ -31,7 +52,6 @@ class GameOverScene : SKScene {
         
         backgroundColor = UIColor.black
         
-        NotificationCenter.default.addObserver(self, selector: #selector(GameOverScene.adFinishedPlaying(_:)), name: NSNotification.Name(rawValue: "AdFinishedPlaying"), object: nil)
     }
     
 
@@ -50,16 +70,17 @@ class GameOverScene : SKScene {
     }
     
     func addLabels() {
-        let continueLabel = SKLabelNode(text: "CONTINUE?")
+        
+        continueLabel = SKLabelNode(text: "CONTINUE?")
         continueLabel.fontName = "Marsh-Stencil"
-        continueLabel.fontSize = 50.0
+        continueLabel.fontSize = 50.0 * resizeRatio
         continueLabel.fontColor = UIColor.white
         continueLabel.position = CGPoint(x: frame.midX, y: frame.midY + frame.height/8)
         worldNode.addChild(continueLabel)
         
         skipLabel = SKLabelNode(text: "- quit -")
         skipLabel.fontName = "Marsh-Stencil"
-        skipLabel.fontSize = 30.0
+        skipLabel.fontSize = 30.0 * resizeRatio
         skipLabel.alpha = 0
         skipLabel.fontColor = UIColor.white
         skipLabel.position = CGPoint(x: frame.midX, y: frame.midY - frame.height/4)
@@ -72,19 +93,20 @@ class GameOverScene : SKScene {
     }
     
     func addCountDown() {
+        
         countDownNumberLabel = SKLabelNode(text: "\(countDown)")
         countDownNumberLabel.fontName = "Marsh-Stencil"
-        countDownNumberLabel.fontSize = 50.0
+        countDownNumberLabel.fontSize = 50.0 * resizeRatio
         countDownNumberLabel.fontColor = UIColor.white
         countDownNumberLabel.position = CGPoint(x: frame.midX, y: frame.midY + frame.height/4)
         countDownNumberLabel.horizontalAlignmentMode = .center
         countDownNumberLabel.verticalAlignmentMode = .center
         worldNode.addChild(countDownNumberLabel)
         print("added count")
-        shrink(countDownNumber: countDownNumberLabel)
+        shrink(countDownNumber: countDownNumberLabel,shouldReturnToMainMenu: true)
     }
     
-    func shrink(countDownNumber: SKLabelNode) {
+    func shrink(countDownNumber: SKLabelNode,shouldReturnToMainMenu: Bool) {
         let makeBig = SKAction.scale(to: 10, duration: 0)
         let shrink = SKAction.scale(to: 1, duration: 0.3)
         let shake = SKAction.customAction(withDuration: 0) { (_, _) in
@@ -93,8 +115,10 @@ class GameOverScene : SKScene {
         let wait = SKAction.wait(forDuration: 0.7)
         let changeNum = SKAction.customAction(withDuration: 0) { (_, _) in
             self.countDown -= 1
-            if self.countDown == 0 {
+            if self.countDown == 0 && shouldReturnToMainMenu {
                 self.returnToMainMenu()
+            } else if self.countDown == 0 {
+                self.returnToGame()
             }
             countDownNumber.text = "\(self.countDown)"
         }
@@ -142,7 +166,7 @@ class GameOverScene : SKScene {
             SKTexture(imageNamed: "box-target"),
             SKTexture(imageNamed: "box-outline"),
             SKTexture(imageNamed: "Conveyor-Belt"),
-            SKTexture(imageNamed: "backf-background-boxes"),
+            SKTexture(imageNamed: "back-background-boxes"),
             SKTexture(imageNamed: "front-background-boxes")
         ]
         
@@ -189,10 +213,55 @@ class GameOverScene : SKScene {
         }
     }
     
+    @objc func errorPlayingAd() {
+        
+        errorPlayingAdExists = true
+        
+        if !countDownNumberLabel.hasActions() {
+            displayReturningToGameMessage()
+        }
+        
+    }
+    
+    private func displayReturningToGameMessage() {
+        
+        continueLabel.removeFromParent()
+        yesButton.removeFromParent()
+        whiteCoverScreen.removeFromParent()
+        
+        let errorDescription = SKLabelNode(text: "Ad failed to load.")
+        errorDescription.fontName = "Marsh-Stencil"
+        errorDescription.fontSize = 30.0 * resizeRatio
+        errorDescription.fontColor = UIColor.white
+        errorDescription.position = CGPoint(x: frame.midX, y: frame.midY + frame.height/4)
+        worldNode.addChild(errorDescription)
+        
+        let errorLabel = SKLabelNode(text: "ERROR")
+        errorLabel.fontName = "Marsh-Stencil"
+        errorLabel.fontSize = 40.0 * resizeRatio
+        errorLabel.fontColor = UIColor.white
+        errorLabel.position = CGPoint(x: frame.midX, y: errorDescription.position.y + errorDescription.frame.height * 3)
+        worldNode.addChild(errorLabel)
+        
+        let returnLabel = SKLabelNode(text: "Game will resume in:")
+        returnLabel.fontName = "Marsh-Stencil"
+        returnLabel.fontSize = 30.0 * resizeRatio
+        returnLabel.fontColor = UIColor.white
+        returnLabel.position = CGPoint(x: frame.midX, y: errorDescription.position.y - errorDescription.frame.height * 2)
+        worldNode.addChild(returnLabel)
+        
+        countDown = 15
+        countDownNumberLabel.removeAllActions()
+        countDownNumberLabel.text = "15"
+        countDownNumberLabel.position = CGPoint(x: frame.midX, y: frame.midY)
+        shrink(countDownNumber: countDownNumberLabel,shouldReturnToMainMenu: false)
+        
+    }
+    
     func stopCountDown() {
         countDownNumberLabel.removeAllActions()
         
-        let whiteCoverScreen = SKSpriteNode(color: .white, size: self.frame.size)
+        whiteCoverScreen = SKSpriteNode(color: .white, size: self.frame.size)
         whiteCoverScreen.position = CGPoint(x: self.frame.midX, y: self.frame.midY)
         whiteCoverScreen.zPosition = 100
         self.addChild(whiteCoverScreen)
@@ -207,12 +276,22 @@ class GameOverScene : SKScene {
         }
         
         if yesButton.frame.contains(touch) {
+            
             preloadTextures()
-            NotificationCenter.default.post(name: Notification.Name(rawValue: "PlayAd"), object: self)
-            stopCountDown()
+            
+            if errorPlayingAdExists {
+                displayReturningToGameMessage()
+            } else {
+                stopCountDown()
+            }
+            
+            if !hasNoAdsPurchased {
+                NotificationCenter.default.post(name: Notification.Name(rawValue: "PlayAd"), object: self)
+            } else {
+                returnToGame()
+            }
+            
         }
-        
-        
     }
     
 }

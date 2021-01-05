@@ -6,6 +6,7 @@
 //  Copyright © 2020 Juan Erenas. All rights reserved.
 //
 
+import StoreKit
 import SpriteKit
 import SwiftKeychainWrapper
 
@@ -16,7 +17,7 @@ class MenuScene: SKScene {
 //    var messageNode = SKNode()
     enum scenes {
         case gameScene
-        case changePlayer
+        case tutorialScene
     }
     
     private var displayBoxesNode = SKNode()
@@ -26,6 +27,7 @@ class MenuScene: SKScene {
     private var boxSize = CGSize()
     private var activeBox = 0
     private var transitioning = false
+    private var lockedShopBoxes = [ShopBox]()
     private var shopBoxes = [ShopBox]()
     private var equipedBoxName = KeychainWrapper.standard.string(forKey: "equipped-box")
     
@@ -33,12 +35,24 @@ class MenuScene: SKScene {
     private var leaderboardIcon = SKSpriteNode()
     private var settingsNode = SKNode()
     private var noAdsButton = SKSpriteNode()
+    private var buyButton = SKSpriteNode()
+    private var currencyLabel = SKLabelNode()
+    
+    private let buyNewBoxPrice = 30
     
     private var texturesArePreloaded = false
+    
+    //used to resize nodes for iPad
+    var resizeRatio : CGFloat = 1
     
     var dimPanel : SKSpriteNode?
     
     override func didMove(to view: SKView) {
+        
+        //used to resize nodes for iPad
+        if self.frame.height > 926 {
+            resizeRatio = self.frame.height / 896
+        }
         
         backgroundColor = UIColor.white
         
@@ -69,122 +83,262 @@ class MenuScene: SKScene {
         turnOnMusic()
         
         preloadTextures()
+        addSwipeGesture()
         
-        NotificationCenter.default.addObserver(self, selector: #selector(GameViewController.buyProduct), name: NSNotification.Name(rawValue: "GrayOutNoAdsButton"), object: nil)
+        //both call the same func for now.
+        NotificationCenter.default.addObserver(self, selector: #selector(MenuScene.removeNoAdsButton), name: NSNotification.Name(rawValue: "GrayOutNoAdsButton"), object: nil)
         
-        NotificationCenter.default.addObserver(self, selector: #selector(GameViewController.buyProduct), name: NSNotification.Name(rawValue: "RemoveNoAdsButtton"), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(MenuScene.removeNoAdsButton), name: NSNotification.Name(rawValue: "RemoveNoAdsButtton"), object: nil)
         
+        NotificationCenter.default.addObserver(self, selector: #selector(MenuScene.purchasedNoAds), name: NSNotification.Name(rawValue: "IAPHelperPurchaseNotification"), object: nil)
     }
     
     func setDefualts() {
         
+        //Sets 0 for coins if it's first time game starts
         if KeychainWrapper.standard.string(forKey: "coins") == nil {
             KeychainWrapper.standard.set("0", forKey: "coins")
         }
         
+        //Ensures there's a value for equipped box
         if KeychainWrapper.standard.string(forKey: "equipped-box") == nil {
             KeychainWrapper.standard.set("box", forKey: "equipped-box")
+        }
+        
+        //Indicates the default box isn't marked as locked
+        if KeychainWrapper.standard.string(forKey: "box") == nil {
+            KeychainWrapper.standard.set("false", forKey: "box")
         }
         
     }
     
     func addLabels() {
         
+//        let resizeRatio = (self.frame.width / 414)
+        
         let logo = SKSpriteNode(imageNamed: "plop-box-logo")
         let width = self.frame.size.width / 8 * 5
-        logo.size = CGSize(width: width, height: width)
+        let height = width * 771 / 1133
+        logo.size = CGSize(width: width, height: height)
         logo.position = CGPoint(x: frame.midX, y: frame.midY + (frame.height/4))
         menuNode.addChild(logo)
+        
+        let grow = SKAction.scale(to: 1.05, duration: 1.5)
+        let shrink = SKAction.scale(to: 0.95, duration: 1.5)
+        grow.timingMode = .easeInEaseOut
+        shrink.timingMode = .easeInEaseOut
+        let growAndShrink = SKAction.sequence([grow,shrink])
+        let growAndShrinkForever = SKAction.repeatForever(growAndShrink)
+        
+        logo.run(growAndShrinkForever)
+        
         
         let highscoreLabel = SKLabelNode(text: "HI-SCORE: " + "\(KeychainWrapper.standard.integer(forKey: "high-score") ?? 0)")
         highscoreLabel.name = "high score label"
         highscoreLabel.fontName = "Marsh-Stencil"
-        highscoreLabel.fontSize = 25.0
-        highscoreLabel.fontColor = UIColor(red: 80/255, green: 95/255, blue: 103/255, alpha: 1)
-        highscoreLabel.position = CGPoint(x: frame.midX, y: logo.position.y - 170)
+        highscoreLabel.fontSize = 25.0 * resizeRatio
+        highscoreLabel.fontColor = .white
+        highscoreLabel.position = CGPoint(x: frame.midX, y: self.frame.midY + 10)
         menuNode.addChild(highscoreLabel)
         
         let recentScoreLabel = SKLabelNode(text: "SCORE: " + "\(KeychainWrapper.standard.integer(forKey: "recent-score") ?? 0)")
         recentScoreLabel.fontName = "Marsh-Stencil"
-        recentScoreLabel.fontSize = 25.0
-        recentScoreLabel.fontColor = UIColor(red: 80/255, green: 95/255, blue: 103/255, alpha: 1)
-        recentScoreLabel.position = CGPoint(x: frame.midX, y: highscoreLabel.position.y - recentScoreLabel.frame.size.height*2)
+        recentScoreLabel.fontSize = 25.0 * resizeRatio
+        recentScoreLabel.fontColor = .white
+        recentScoreLabel.position = CGPoint(x: frame.midX, y: highscoreLabel.position.y - recentScoreLabel.frame.size.height*1.5)
         menuNode.addChild(recentScoreLabel)
         
         let playLabel = SKLabelNode(text: "- tap to play -")
         playLabel.fontName = "Marsh-Stencil"
-        playLabel.fontSize = 30.0
-        playLabel.fontColor = UIColor(red: 80/255, green: 95/255, blue: 103/255, alpha: 1)
+        playLabel.fontSize = 30.0 * resizeRatio
+        playLabel.fontColor = .white
         playLabel.position = CGPoint(x: frame.midX, y: self.frame.minY + playLabel.frame.height * 4)
         menuNode.addChild(playLabel)
         animate(label: playLabel)
         
         settings = SKSpriteNode(imageNamed: "gear")
-        settings.size = CGSize(width: 40.0, height: 40.0)
-        settings.color = UIColor(red: 80/255, green: 95/255, blue: 103/255, alpha: 1)
+        settings.size = CGSize(width: 40.0 * resizeRatio, height: 40.0 * resizeRatio)
+        settings.color = .white
         settings.colorBlendFactor = 1
-        settings.position = CGPoint(x: frame.minX + 40, y: frame.maxY - 40)
+        settings.position = CGPoint(x: frame.minX + settings.size.width * 0.8, y: frame.maxY - settings.size.height * 1.3)
         menuNode.addChild(settings)
         
+        let rotate = SKAction.rotate(byAngle: .pi * 2, duration: 2)
+        let rotateForever = SKAction.repeatForever(rotate)
+        settings.run(rotateForever)
+        
         leaderboardIcon = SKSpriteNode(imageNamed: "trophy")
-        leaderboardIcon.size = CGSize(width: 40.0, height: 40.0)
-        leaderboardIcon.color = UIColor(red: 80/255, green: 95/255, blue: 103/255, alpha: 1)
+        leaderboardIcon.size = CGSize(width: 40.0 * resizeRatio, height: 40.0 * resizeRatio)
+        leaderboardIcon.color = .white
         leaderboardIcon.colorBlendFactor = 1
         leaderboardIcon.position = CGPoint(x: settings.position.x, y: settings.position.y - settings.size.height * 1.5)
         menuNode.addChild(leaderboardIcon)
         
-        noAdsButton = SKSpriteNode(imageNamed: "trophy")
-        noAdsButton.size = CGSize(width: 40.0, height: 40.0)
-        noAdsButton.color = UIColor(red: 80/255, green: 95/255, blue: 103/255, alpha: 1)
-        noAdsButton.colorBlendFactor = 1
-        noAdsButton.position = CGPoint(x: leaderboardIcon.position.x, y: leaderboardIcon.position.y - leaderboardIcon.size.height * 1.5)
-        menuNode.addChild(noAdsButton)
+        let hasNoAdsUnlocked = KeychainWrapper.standard.bool(forKey: "com.buffthumbgames.plopbox.removeads") ?? false
+        if !hasNoAdsUnlocked {
+            noAdsButton = SKSpriteNode(imageNamed: "no-ads")
+            noAdsButton.size = CGSize(width: 40.0 * resizeRatio, height: 40.0 * resizeRatio)
+            noAdsButton.color = .white
+            noAdsButton.colorBlendFactor = 1
+            noAdsButton.position = CGPoint(x: leaderboardIcon.position.x, y: leaderboardIcon.position.y - leaderboardIcon.size.height * 1.5)
+            menuNode.addChild(noAdsButton)
+        }
         
         let coin = SKSpriteNode(imageNamed: "Coin")
-        coin.size = CGSize(width: 30.0, height: 30.0)
+        coin.size = CGSize(width: 30.0 * resizeRatio, height: 30.0 * resizeRatio)
         coin.color = UIColor.white
         coin.colorBlendFactor = 1
-        coin.position = CGPoint(x: frame.maxX - 30, y: frame.maxY - 30)
+        coin.position = CGPoint(x: frame.maxX - coin.size.width, y: frame.maxY - coin.size.height * 1.6)
         menuNode.addChild(coin)
         
         let currencyText = KeychainWrapper.standard.string(forKey: "coins")
-        let currency = SKLabelNode(text: currencyText)
-        currency.fontName = "AvenirNext-Bold"
-        currency.name = "change player"
-        currency.fontSize = 30.0
-        currency.fontColor = UIColor(red: 80/255, green: 95/255, blue: 103/255, alpha: 1)
-        currency.horizontalAlignmentMode = .right
-        currency.verticalAlignmentMode = .center
-        currency.position = CGPoint(x: coin.position.x - 20, y: coin.position.y)
-        menuNode.addChild(currency)
+        currencyLabel = SKLabelNode(text: currencyText)
+        currencyLabel.fontName = "AvenirNext-Bold"
+        currencyLabel.name = "change player"
+        currencyLabel.fontSize = 30.0 * resizeRatio
+        currencyLabel.fontColor = .white
+        currencyLabel.horizontalAlignmentMode = .right
+        currencyLabel.verticalAlignmentMode = .center
+        currencyLabel.position = CGPoint(x: coin.position.x - coin.size.width * 0.7, y: coin.position.y)
+        menuNode.addChild(currencyLabel)
+        
+    }
+    
+    //Adds swipe gesture animation telling user they can swipe right
+    func addSwipeGesture() {
+        
+        //Only run if the user has enough money to buy a new box
+        let currencyText = KeychainWrapper.standard.string(forKey: "coins")
+        let currentMoney = Int(currencyText!) ?? 0
+        if currentMoney < buyNewBoxPrice || lockedShopBoxes.count == 0 {return}
+        
+        let middleBoxPosition = CGPoint(x: self.frame.midX, y: self.frame.midY - self.frame.height/6 - boxSize.height / 2)
+        let rightOfMiddleBoxPos = CGPoint(x: middleBoxPosition.x + boxSize.width, y: middleBoxPosition.y)
+        let leftOfMiddleBoxPos = CGPoint(x: middleBoxPosition.x - boxSize.width, y: middleBoxPosition.y)
+        
+        let swipeIcon = SKSpriteNode(imageNamed: "swipe-icon")
+        swipeIcon.anchorPoint = CGPoint(x: 0.5, y: 0.5)
+        swipeIcon.position = rightOfMiddleBoxPos
+        swipeIcon.size = boxSize
+        swipeIcon.name = "swipe-icon"
+        swipeIcon.alpha = 0
+        swipeIcon.zPosition = 2
+        displayBoxesNode.addChild(swipeIcon)
+        
+        let wait = SKAction.wait(forDuration: 2)
+        let appear = SKAction.fadeAlpha(to: 0.8, duration: 0.2)
+        let moveLeft = SKAction.moveTo(x: leftOfMiddleBoxPos.x, duration: 0.7)
+        moveLeft.timingMode = .easeOut
+        let moveBackToRight = SKAction.moveTo(x: rightOfMiddleBoxPos.x, duration: 0)
+        let dissappear = SKAction.fadeAlpha(to: 0, duration: 0.3)
+        let removeFromParent = SKAction.removeFromParent()
+        let sequence = SKAction.sequence([wait,appear,moveLeft,moveBackToRight,moveLeft,dissappear,removeFromParent])
+        
+        swipeIcon.run(sequence)
         
     }
     
     func addDisplayBoxes() {
         
+        //create box size and box positions
         boxSize = CGSize(width: self.frame.width / 6, height: self.frame.width / 6)
-        
-        //Make box in middle of screen
         let middleBoxPosition = CGPoint(x: self.frame.midX - boxSize.width/2, y: self.frame.midY - self.frame.height/6)
-        create(shopBox: shopBoxes[activeBox], atPos: middleBoxPosition, animate: true)
+        let rightBoxPosition = CGPoint(x: middleBoxPosition.x + self.frame.width, y: middleBoxPosition.y)
+        let leftBoxPosition = CGPoint(x: middleBoxPosition.x - self.frame.width, y: middleBoxPosition.y)
         
-        KeychainWrapper.standard.set(shopBoxes[activeBox].name, forKey: "equipped-box")
+        //This is only true if the "buy new box" button is displaying
+        if activeBox == shopBoxes.count {
+            createBuyBoxButtonAt(pos: middleBoxPosition,shouldAnimate: true)
+        } else {
+            //Make box in middle of screen
+            create(shopBox: shopBoxes[activeBox], atPos: middleBoxPosition, animate: true)
+            KeychainWrapper.standard.set(shopBoxes[activeBox].name, forKey: "equipped-box")
+            
+            //make light behind the box
+            let lightPosition = CGPoint(x: self.frame.midX, y: middleBoxPosition.y)
+            createLightAt(pos: lightPosition)
+        }
         
         if activeBox > 0 {
             //Make Box on Left
-            let leftBoxPosition = CGPoint(x: middleBoxPosition.x - self.frame.width, y: middleBoxPosition.y)
             create(shopBox: shopBoxes[activeBox - 1], atPos: leftBoxPosition, animate: false)
         }
         
         if activeBox < shopBoxes.count - 1 {
             //Make Box on Right
-            let rightBoxPosition = CGPoint(x: middleBoxPosition.x + self.frame.width, y: middleBoxPosition.y)
             create(shopBox: shopBoxes[activeBox + 1], atPos: rightBoxPosition, animate: false)
+        }
+        
+        //True when the "Buy New Box" button should be on the right
+        if activeBox == shopBoxes.count - 1 && lockedShopBoxes.count > 0 {
+            createBuyBoxButtonAt(pos: rightBoxPosition,shouldAnimate: false)
         }
     }
     
     
     //MARK: - Create Boxes
+    
+    private func createLightAt(pos: CGPoint) {
+        
+        //Creates a light node that makes the box pop from the background
+        let light = SKSpriteNode(imageNamed: "box-light")
+        light.size = CGSize(width: boxSize.width * 2.5, height: boxSize.height * 2.5)
+        light.anchorPoint = CGPoint(x: 0.5, y: 0.5)
+        light.position = pos
+        light.alpha = 0
+        light.name = "light"
+        light.zPosition = -1
+        displayBoxesNode.addChild(light)
+        
+        //animate the light to rotate
+        let rotate = SKAction.rotate(byAngle: .pi, duration: 4)
+        let rotateForever = SKAction.repeatForever(rotate)
+        light.run(rotateForever)
+        
+        //animate the light to appear
+        let appear = SKAction.fadeAlpha(to: 0.6, duration: 0.3)
+        light.run(appear)
+        
+        //makes light go up and down like the box
+        animate(box: light)
+    }
+    
+    private func createBuyBoxButtonAt(pos: CGPoint,shouldAnimate: Bool) {
+        
+        //Have to adjust position since buy button is bigger than boxes
+        let adjustedPosition = CGPoint(x: pos.x - boxSize.width / 4, y: pos.y)
+        let middlePosition = CGPoint(x: pos.x + boxSize.width / 2, y: pos.y)
+        
+        buyButton = SKSpriteNode(imageNamed: "unlock-box-button")
+        buyButton.position = adjustedPosition
+        buyButton.size = CGSize(width: boxSize.width * 1.5, height: boxSize.height * 1.5)
+        buyButton.anchorPoint = CGPoint(x: 0, y: 0.5)
+        
+        displayBoxesNode.addChild(buyButton)
+        
+        if shouldAnimate {
+            animate(box: buyButton)
+        }
+        
+        let buyBoxPrice = SKLabelNode(text: "Cost: \(buyNewBoxPrice)")
+        buyBoxPrice.fontName = "AvenirNext-Bold"
+        buyBoxPrice.name = "buy box price"
+        buyBoxPrice.fontSize = 30.0 * resizeRatio
+        buyBoxPrice.fontColor = .white
+        buyBoxPrice.horizontalAlignmentMode = .center
+        buyBoxPrice.verticalAlignmentMode = .center
+        let coinWidth = 30.0 * resizeRatio
+        buyBoxPrice.position = CGPoint(x: middlePosition.x - coinWidth * 1.2 / 2, y: buyButton.position.y - buyButton.size.height / 2 - buyBoxPrice.frame.height)
+        displayBoxesNode.addChild(buyBoxPrice)
+        
+        let coin = SKSpriteNode(imageNamed: "Coin")
+        coin.size = CGSize(width: 30.0 * resizeRatio, height: 30.0 * resizeRatio)
+        coin.color = UIColor.white
+        coin.colorBlendFactor = 1
+        coin.name = "buy box coin"
+        coin.position = CGPoint(x: buyBoxPrice.position.x + buyBoxPrice.frame.width/2 + coin.size.width * 0.7, y: buyBoxPrice.position.y)
+        displayBoxesNode.addChild(coin)
+    }
     
     private func create(shopBox: ShopBox,atPos pos: CGPoint,animate: Bool) {
         
@@ -197,28 +351,9 @@ class MenuScene: SKScene {
             self.animate(box: box)
         }
         
-        if shopBox.locked == true {
-            
-            let buttonSize = CGSize(width: boxSize.width, height: boxSize.width / 3)
-            let button = SKSpriteNode(color: .red, size: buttonSize)
-            button.position = CGPoint(x: box.position.x + box.size.width/2, y: box.position.y - box.size.height)
-            displayBoxesNode.addChild(button)
-            
-            let boxCost = SKLabelNode(text: "\(shopBox.price)")
-            
-            boxCost.name = "box cost"
-            boxCost.fontName = "Marsh-Stencil"
-            boxCost.fontSize = 20.0
-            boxCost.fontColor = UIColor.white
-            boxCost.verticalAlignmentMode = .center
-            boxCost.horizontalAlignmentMode = .center
-            boxCost.position = button.position
-            displayBoxesNode.addChild(boxCost)
-        }
-        
     }
     
-    func animate(box: Box) {
+    func animate(box: SKSpriteNode) {
         
         let originalPos = box.position
         let goUp = SKAction.moveTo(y: originalPos.y + 10, duration: 0.5)
@@ -250,38 +385,186 @@ class MenuScene: SKScene {
     }
     
     func createBackground() {
-
-        createMovingBackground(withImageNamed: "front-background-boxes", height: frame.height, duration: 10,zPosition: -200,alpha: 1)
-        createMovingBackground(withImageNamed: "back-background-boxes", height: frame.height, duration: 30, zPosition: -300,alpha: 0.4)
+        
+        let width = self.frame.size.width
+        let height = width / 1242 * 2688
+        
+        let background = SKSpriteNode(imageNamed: "plop-box-background")
+        background.size = CGSize(width: width, height: height)
+        background.anchorPoint = CGPoint(x: 0.5, y: 0.5)
+        background.position = CGPoint(x: self.frame.midX, y: self.frame.midY)
+        background.zPosition = -2
+        self.addChild(background)
         
     }
     
-    func createMovingBackground(withImageNamed imageName: String,height: CGFloat,duration: Double, zPosition: CGFloat,alpha: CGFloat) {
-        let backgroundTexture = SKTexture(imageNamed: imageName)
-        
-        for i in 0 ... 1 {
-            let background = SKSpriteNode(texture: backgroundTexture)
-            background.size = CGSize(width: frame.width, height: height)
-            background.alpha = alpha
-            background.zPosition = zPosition
-            background.anchorPoint = CGPoint.zero
-            background.position = CGPoint(x: 0, y: (height * CGFloat(i)) - CGFloat(1 * i))
-            
-            self.addChild(background)
-            
-            let moveDown = SKAction.moveBy(x: 0, y: -height, duration: duration)
-            let moveReset = SKAction.moveBy(x: 0, y: height, duration: 0)
-            let moveLoop = SKAction.sequence([moveDown, moveReset])
-            let moveForever = SKAction.repeatForever(moveLoop)
-            
-            background.run(moveForever)
-        }
-    }
+
     
     //MARK: - Handle Transactions
     
-    func touchedBuyButton(forBoxNamed boxName: String) {
+    private func noAdsButtonPressed() {
         
+        let shrink = SKAction.scale(to: 0.8, duration: 0.2)
+        let grow = SKAction.scale(to: 1, duration: 0.2)
+        let sequence = SKAction.sequence([shrink,grow])
+        
+        noAdsButton.run(sequence)
+        
+        NotificationCenter.default.post(name: Notification.Name(rawValue: "BuyNoAds"), object: self)
+        
+    }
+    
+    
+    @objc func purchasedNoAds() {
+        
+        let grow = SKAction.scale(to: 1.5, duration: 0.3)
+        let turnGreen = SKAction.colorize(with: .green, colorBlendFactor: 1, duration: 0.3)
+        let growAndTurnGreen = SKAction.group([grow,turnGreen])
+        
+        let shrink = SKAction.scale(to: 0, duration: 0.3)
+        let removeFromParents = SKAction.removeFromParent()
+        let sequence = SKAction.sequence([growAndTurnGreen,shrink,removeFromParents])
+        
+        noAdsButton.run(sequence)
+        
+    }
+    
+    private func shakeBuyBoxPrice() {
+        
+        var buyBoxPriceNode : SKLabelNode?
+        var buyBoxCoin : SKSpriteNode?
+        
+        for node in displayBoxesNode.children {
+            if node.name == "buy box price" {
+                buyBoxPriceNode = node as? SKLabelNode
+            } else if node.name == "buy box coin" {
+                buyBoxCoin = node as? SKSpriteNode
+            }
+        }
+        
+        if buyBoxPriceNode != nil && buyBoxCoin != nil {
+            
+            //prevents it from shaking if it's already shaking
+            if buyBoxPriceNode!.hasActions() {return}
+            
+            shake(node: buyBoxPriceNode!)
+            shake(node: buyBoxCoin!)
+        }
+        
+        
+    }
+    
+    private func shake(node: SKNode) {
+        let currentPos = node.position
+        let moveLeft = SKAction.moveTo(x: currentPos.x - 20, duration: 0.1)
+        let moveRight = SKAction.moveTo(x: currentPos.x + 20, duration: 0.1)
+        let returnToPos = SKAction.moveTo(x: currentPos.x, duration: 0.05)
+        
+        let sequence = SKAction.sequence([moveLeft,moveRight,moveLeft,moveRight,returnToPos])
+        node.run(sequence)
+    }
+    
+    func touchedBuyButton() {
+        if transitioning {return}
+        if lockedShopBoxes.count == 0 {return}
+        transitioning = true
+   
+        
+        //Checks if user has enough money to purchase
+        let currencyText = KeychainWrapper.standard.string(forKey: "coins")
+        var currentMoney = Int(currencyText!) ?? 0
+        if currentMoney < buyNewBoxPrice {
+            transitioning = false
+            shakeBuyBoxPrice()
+            return
+        }
+        
+        //Runs animation to reduce coins
+        currentMoney = currentMoney - buyNewBoxPrice
+        KeychainWrapper.standard.set("\(currentMoney)", forKey: "coins")
+        
+        let wait = SKAction.wait(forDuration: 0.01)
+        let subtractOneCoin = SKAction.customAction(withDuration: 0) { (_, _) in
+            if self.currencyLabel.text == "\(currentMoney)" {
+                self.currencyLabel.removeAllActions()
+                return
+            } else {
+                var moneyOnLabel = Int(self.currencyLabel.text!) ?? 0
+                moneyOnLabel -= 1
+                self.currencyLabel.text = "\(moneyOnLabel)"
+            }
+        }
+        
+        let sequence = SKAction.sequence([subtractOneCoin,wait])
+        let loopForever = SKAction.repeatForever(sequence)
+        
+        currencyLabel.run(loopForever)
+        
+        //runs animation to show what box you get
+        
+        //reposition anchor points so that shrink animation doesn't go left
+        buyButton.position = CGPoint(x: buyButton.position.x + buyButton.size.width/2, y: buyButton.position.y)
+        buyButton.anchorPoint = CGPoint(x: 0.5, y: 0.5)
+        let newBoxPosition = buyButton.position
+        
+        
+        //make buy box button dissappear
+        let clickButton = SKAction.scale(to: 0.7, duration: 0.1)
+        let returnToNormalSize = SKAction.scale(to: 1, duration: 0.1)
+        let shrink = SKAction.scale(to: 0, duration: 0.5)
+        let rotate = SKAction.rotate(byAngle: 2 * .pi, duration: 0.5)
+        let shrinkAndRotate = SKAction.group([shrink,rotate])
+        let removeFromParent = SKAction.removeFromParent()
+        
+        let buyButtonSequence = SKAction.sequence([clickButton,returnToNormalSize,shrinkAndRotate,removeFromParent])
+        
+        buyButton.run(buyButtonSequence)
+        //resets the scale
+        buyButton.setScale(1)
+        
+        //make new box appear
+        let newBox = lockedShopBoxes[0]
+        let size = boxSize
+        let box = Box(size: size,imageNamed: newBox.name,texture: SKTexture(imageNamed: newBox.name))
+        box.position = newBoxPosition
+        box.alpha = 0
+        box.anchorPoint = CGPoint(x: 0.5, y: 0.5)
+        displayBoxesNode.addChild(box)
+        let waitForBuyBox = SKAction.wait(forDuration: 1)
+        let raiseAlpha = SKAction.fadeAlpha(to: 0.2, duration: 0.1)
+        let dissappear = SKAction.fadeAlpha(to: 0, duration: 0.1)
+        
+        let appear = SKAction.fadeAlpha(to: 1, duration: 0.1)
+        let grow = SKAction.scale(to: 1.5, duration: 0.2)
+        let resetToNormalSize = SKAction.scale(to: 1, duration: 0.1)
+        let growAndReset = SKAction.sequence([grow,resetToNormalSize])
+        let growAndAppear = SKAction.group([appear,growAndReset])
+        
+        let indicateAnimationisOver = SKAction.customAction(withDuration: 0) { (_, _) in
+            self.transitioning = false
+            self.updateBoxes()
+        }
+        
+        var showBox = SKAction.sequence([waitForBuyBox,raiseAlpha,dissappear,raiseAlpha,dissappear,raiseAlpha,dissappear,growAndAppear,indicateAnimationisOver])
+        
+        //Ask for rating if it's the third box being bought
+        if shopBoxes.count == 2 {
+            let wait = SKAction.wait(forDuration: 1)
+            let askForRating = SKAction.customAction(withDuration: 0) { (_, _) in
+                if #available(iOS 10.3, *) {
+                    SKStoreReviewController.requestReview()
+                }
+            }
+            showBox = SKAction.sequence([waitForBuyBox,raiseAlpha,dissappear,raiseAlpha,dissappear,raiseAlpha,dissappear,growAndAppear,indicateAnimationisOver,wait,askForRating])
+        }
+        
+        box.run(showBox)
+        
+        //makes box available to be equiped
+        lockedShopBoxes.remove(at: 0)
+        shopBoxes.append(newBox)
+        
+        KeychainWrapper.standard.set("false", forKey: newBox.name)
     }
     
     
@@ -293,6 +576,14 @@ class MenuScene: SKScene {
         activeBox -= 1
         transitioning = true
         let duration = 0.3
+        
+        //Makes the light behind the box fade
+        for child in displayBoxesNode.children {
+            if child.name == "light" {
+                let fade = SKAction.fadeAlpha(to: 0, duration: 0.3)
+                child.run(fade)
+            }
+        }
         
         //change boxes
         let moveRight = SKAction.moveBy(x: self.frame.width, y: 0, duration: duration)
@@ -307,7 +598,8 @@ class MenuScene: SKScene {
     }
     
     @objc func swipedLeft() {
-        if activeBox >= shopBoxes.count - 1 {return}
+        if activeBox >= shopBoxes.count {return}
+        if activeBox == shopBoxes.count - 1 && lockedShopBoxes.count == 0 {return}
         if transitioning {return}
         activeBox += 1
         transitioning = true
@@ -327,6 +619,8 @@ class MenuScene: SKScene {
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         
+        if transitioning {return}
+        
         //Checks if settings button has been clicked
         if let touch = touches.first?.location(in: self) {
             
@@ -340,13 +634,21 @@ class MenuScene: SKScene {
                 NotificationCenter.default.post(name: Notification.Name(rawValue: "ShowLeaderboards"), object: self)
                 return
             } else if noAdsButton.contains(touch)  {
-                NotificationCenter.default.post(name: Notification.Name(rawValue: "BuyNoAds"), object: self)
+                noAdsButtonPressed()
+                return
+            } else if buyButton.contains(touch) {
+                touchedBuyButton()
                 return
             }
         }
         
         //else start game
-        performExitAnimation(AndGoTo: .gameScene)
+        if UserDefaults.standard.bool(forKey: "has-played-before") == true {
+            performExitAnimation(AndGoTo: .gameScene)
+        } else {
+            performExitAnimation(AndGoTo: .tutorialScene)
+            UserDefaults.standard.setValue(true, forKey: "has-played-before")
+        }
         
     }
     
@@ -358,6 +660,9 @@ class MenuScene: SKScene {
         let moveDown = SKAction.moveTo(y: belowViewY, duration: 0.1)
         let moveUp = SKAction.moveTo(y: posY + 100, duration: 0.3)
         let resetPos = SKAction.moveTo(y: posY, duration: 0.3)
+        
+        moveUp.timingMode = .easeInEaseOut
+        resetPos.timingMode = .easeInEaseOut
         
         let sequence = SKAction.sequence([moveDown,moveUp,resetPos])
         menuNode.run(sequence)
@@ -376,8 +681,8 @@ class MenuScene: SKScene {
         let presentScene = SKAction.customAction(withDuration: 0) { (_, _) in
             if scene == .gameScene {
                 self.goToGameScene()
-            } else if scene == .changePlayer {
-//                self.goToCharacterSelect()
+            } else if scene == .tutorialScene {
+                self.goToTutorialScene()
             }
         }
 
@@ -428,6 +733,11 @@ class MenuScene: SKScene {
     func goToGameScene() {
         let gameScene = GameScene(size: self.view!.bounds.size)
         self.view!.presentScene(gameScene)
+    }
+    
+    func goToTutorialScene() {
+        let tutorialScene = TutorialScene(size: self.view!.bounds.size)
+        self.view!.presentScene(tutorialScene)
     }
  
     //MARK: - Settings Handler
@@ -544,15 +854,33 @@ class MenuScene: SKScene {
     
     private func pressed(ratingsButton: SettingsButton) {
         ratingsButton.playGrowAnimation()
+        rateApp()
+        
+        
         print("pressed ratings button")
     }
     
-    private func grayOutNoAdsButton() {
+    @objc private func grayOutNoAdsButton() {
+        noAdsButton.colorBlendFactor = 1
         noAdsButton.color = .gray
     }
     
-    private func removeNoAdsButton() {
+    @objc private func removeNoAdsButton() {
         noAdsButton.removeFromParent()
+    }
+    
+    func rateApp() {
+        
+        if #available(iOS 10.3, *) {
+            SKStoreReviewController.requestReview()
+            
+        } else if let url = URL(string: "itms-apps://itunes.apple.com/app/" + "id1527959918") {
+            if #available(iOS 10, *) {
+                UIApplication.shared.open(url, options: [:], completionHandler: nil)
+            } else {
+                UIApplication.shared.openURL(url)
+            }
+        }
     }
     
     
@@ -574,24 +902,41 @@ extension MenuScene {
     
     private func createShopBoxes() {
         if shopBoxes.count != 0 {return}
+        var createdBoxes = [ShopBox]()
         
-        let shopBox1 = ShopBox(name: "box", price: 100, locked: false)
-        shopBoxes.append(shopBox1)
+        let shopBox1 = ShopBox(name: "box", locked: false)
+        createdBoxes.append(shopBox1)
         
-        let shopBox2 = ShopBox(name: "treasure-chest", price: 200, locked: checkIfLockedFor(key: "treasure-box"))
-        shopBoxes.append(shopBox2)
+        let shopBox2 = ShopBox(name: "treasure-chest", locked: checkIfLockedFor(key: "treasure-chest"))
+        createdBoxes.append(shopBox2)
         
-        let shopBox3 = ShopBox(name: "wooden-box", price: 300, locked: checkIfLockedFor(key: "wooden-box"))
-        shopBoxes.append(shopBox3)
+        let shopBox3 = ShopBox(name: "burger", locked: checkIfLockedFor(key: "burger"))
+        createdBoxes.append(shopBox3)
         
-        let shopBox4 = ShopBox(name: "toaster", price: 300, locked: checkIfLockedFor(key: "toaster"))
-        shopBoxes.append(shopBox4)
+        let shopBox4 = ShopBox(name: "toaster", locked: checkIfLockedFor(key: "toaster"))
+        createdBoxes.append(shopBox4)
         
-        let shopBox5 = ShopBox(name: "safe", price: 300, locked: checkIfLockedFor(key: "safe"))
-        shopBoxes.append(shopBox5)
+        let shopBox5 = ShopBox(name: "drawer", locked: checkIfLockedFor(key: "drawer"))
+        createdBoxes.append(shopBox5)
         
-        let shopBox6 = ShopBox(name: "cactus", price: 300, locked: checkIfLockedFor(key: "cactus"))
-        shopBoxes.append(shopBox6)
+        let shopBox6 = ShopBox(name: "camera", locked: checkIfLockedFor(key: "camera"))
+        createdBoxes.append(shopBox6)
+        
+        let shopBox7 = ShopBox(name: "television", locked: checkIfLockedFor(key: "television"))
+        createdBoxes.append(shopBox7)
+        
+        let shopBox8 = ShopBox(name: "sofa", locked: checkIfLockedFor(key: "sofa"))
+        createdBoxes.append(shopBox8)
+        
+        for box in createdBoxes {
+            if box.locked == true {
+                //These boxes will not be displayed and will be used when a new one is bought
+                lockedShopBoxes.append(box)
+            } else {
+                //Add it to the array that will display boxes
+                shopBoxes.append(box)
+            }
+        }
         
         makeActiveBoxDefault()
     }
@@ -613,8 +958,8 @@ extension MenuScene {
         let locked = KeychainWrapper.standard.string(forKey: key)
         
         if locked == nil {
-            KeychainWrapper.standard.set("false", forKey: key)
-            return false
+            KeychainWrapper.standard.set("true", forKey: key)
+            return true
         } else {
             return locked!.bool!
         }

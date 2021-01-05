@@ -146,6 +146,7 @@ class SettingsButton : SKSpriteNode {
             updateSettings()
             playGrowAnimation(AndChangeTexture: true)
         } else {
+            
             print("ratings button or arrow button clicked. Don't call 'buttonClicked()' for these two button types")
         }
     }

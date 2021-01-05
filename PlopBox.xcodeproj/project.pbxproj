@@ -7,9 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		435013B483154FEB5D023EA6 /* Pods_PlopBox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0EE73D15567B1892248DB4C1 /* Pods_PlopBox.framework */; };
-		44040F7B24ABC6000097C0B5 /* ShopBoxDisplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44040F7A24ABC6000097C0B5 /* ShopBoxDisplay.swift */; };
+		270D38E4ADB0E37721C8B5AB /* Pods_PlopBox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 02E1B927171DFC6677342885 /* Pods_PlopBox.framework */; };
+		4409874825706138009A076C /* PrecisionLabelHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4409874725706138009A076C /* PrecisionLabelHandler.swift */; };
 		4422393024958D5F0057EE42 /* PrecisionRating.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4422392F24958D5F0057EE42 /* PrecisionRating.swift */; };
+		442B4924259FBA31008A9EAC /* TutorialScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 442B4923259FBA31008A9EAC /* TutorialScene.swift */; };
 		442C062C24F19A0200BFFB08 /* GameKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 442C062B24F19A0200BFFB08 /* GameKit.framework */; };
 		442CAC0324B386A4009E8E97 /* woosh.wav in Resources */ = {isa = PBXBuildFile; fileRef = 442CAC0224B386A4009E8E97 /* woosh.wav */; };
 		442CAC0724B398E9009E8E97 /* impact.wav in Resources */ = {isa = PBXBuildFile; fileRef = 442CAC0624B398E9009E8E97 /* impact.wav */; };
@@ -26,12 +27,9 @@
 		448432D224B4150500837E64 /* perfect.wav in Resources */ = {isa = PBXBuildFile; fileRef = 448432D124B4150500837E64 /* perfect.wav */; };
 		448432D424B4151500837E64 /* awesome.wav in Resources */ = {isa = PBXBuildFile; fileRef = 448432D324B4151500837E64 /* awesome.wav */; };
 		4499515924BA64DC0029CF26 /* Hadouken.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 4499515824BA64DC0029CF26 /* Hadouken.mp3 */; };
-		44AA62F22484E36400B5F6F7 /* smoke.sks in Resources */ = {isa = PBXBuildFile; fileRef = 44AA62F02484E36400B5F6F7 /* smoke.sks */; };
-		44AA62F32484E36400B5F6F7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 44AA62F12484E36400B5F6F7 /* Assets.xcassets */; };
 		44C31D0B247B426000C25149 /* InvisibleBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44C31D0A247B426000C25149 /* InvisibleBox.swift */; };
 		44E9F5D124FC288500DD590C /* IAPHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44E9F5D024FC288500DD590C /* IAPHelper.swift */; };
 		44F3BAEC248C328D000A5CA4 /* ShopBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44F3BAEB248C328D000A5CA4 /* ShopBox.swift */; };
-		44F92DED247AEB030072096E /* BoxShootingAnimation.atlas in Resources */ = {isa = PBXBuildFile; fileRef = 44F92DEC247AEB020072096E /* BoxShootingAnimation.atlas */; };
 		44F92DEF247AEB960072096E /* BoxShooter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44F92DEE247AEB960072096E /* BoxShooter.swift */; };
 		44FC41A924FDEFF90031CFF7 /* PlopBoxProducts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44FC41A824FDEFF90031CFF7 /* PlopBoxProducts.swift */; };
 		44FECD3C2473209D00805D0F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44FECD3B2473209D00805D0F /* AppDelegate.swift */; };
@@ -44,9 +42,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		0EE73D15567B1892248DB4C1 /* Pods_PlopBox.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PlopBox.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		44040F7A24ABC6000097C0B5 /* ShopBoxDisplay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShopBoxDisplay.swift; sourceTree = "<group>"; };
+		02E1B927171DFC6677342885 /* Pods_PlopBox.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PlopBox.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		4409874725706138009A076C /* PrecisionLabelHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PrecisionLabelHandler.swift; sourceTree = "<group>"; };
 		4422392F24958D5F0057EE42 /* PrecisionRating.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrecisionRating.swift; sourceTree = "<group>"; };
+		442B4923259FBA31008A9EAC /* TutorialScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TutorialScene.swift; sourceTree = "<group>"; };
 		442C062B24F19A0200BFFB08 /* GameKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameKit.framework; path = System/Library/Frameworks/GameKit.framework; sourceTree = SDKROOT; };
 		442CAC0224B386A4009E8E97 /* woosh.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = woosh.wav; sourceTree = "<group>"; };
 		442CAC0624B398E9009E8E97 /* impact.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = impact.wav; sourceTree = "<group>"; };
@@ -63,12 +62,9 @@
 		448432D124B4150500837E64 /* perfect.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = perfect.wav; sourceTree = "<group>"; };
 		448432D324B4151500837E64 /* awesome.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = awesome.wav; sourceTree = "<group>"; };
 		4499515824BA64DC0029CF26 /* Hadouken.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = Hadouken.mp3; sourceTree = "<group>"; };
-		44AA62F02484E36400B5F6F7 /* smoke.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = smoke.sks; sourceTree = "<group>"; };
-		44AA62F12484E36400B5F6F7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = ../Controller/Assets.xcassets; sourceTree = "<group>"; };
 		44C31D0A247B426000C25149 /* InvisibleBox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InvisibleBox.swift; sourceTree = "<group>"; };
 		44E9F5D024FC288500DD590C /* IAPHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IAPHelper.swift; sourceTree = "<group>"; };
 		44F3BAEB248C328D000A5CA4 /* ShopBox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShopBox.swift; sourceTree = "<group>"; };
-		44F92DEC247AEB020072096E /* BoxShootingAnimation.atlas */ = {isa = PBXFileReference; lastKnownFileType = folder.skatlas; path = BoxShootingAnimation.atlas; sourceTree = "<group>"; };
 		44F92DEE247AEB960072096E /* BoxShooter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoxShooter.swift; sourceTree = "<group>"; };
 		44FC41A824FDEFF90031CFF7 /* PlopBoxProducts.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlopBoxProducts.swift; sourceTree = "<group>"; };
 		44FECD382473209D00805D0F /* PlopBox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PlopBox.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -80,8 +76,8 @@
 		44FECD4B2473209E00805D0F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		44FECD4D2473209E00805D0F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		44FECD53247321E100805D0F /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
-		5775247878BC98A836A0D25A /* Pods-PlopBox.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PlopBox.release.xcconfig"; path = "Target Support Files/Pods-PlopBox/Pods-PlopBox.release.xcconfig"; sourceTree = "<group>"; };
-		F496532B2805A44135292F8F /* Pods-PlopBox.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PlopBox.debug.xcconfig"; path = "Target Support Files/Pods-PlopBox/Pods-PlopBox.debug.xcconfig"; sourceTree = "<group>"; };
+		7D2476F04A093E9245FC4987 /* Pods-PlopBox.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PlopBox.release.xcconfig"; path = "Target Support Files/Pods-PlopBox/Pods-PlopBox.release.xcconfig"; sourceTree = "<group>"; };
+		892E1114BA80850C1ABD6797 /* Pods-PlopBox.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PlopBox.debug.xcconfig"; path = "Target Support Files/Pods-PlopBox/Pods-PlopBox.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -90,8 +86,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				448035152503105400A9963F /* StoreKit.framework in Frameworks */,
-				435013B483154FEB5D023EA6 /* Pods_PlopBox.framework in Frameworks */,
 				442C062C24F19A0200BFFB08 /* GameKit.framework in Frameworks */,
+				270D38E4ADB0E37721C8B5AB /* Pods_PlopBox.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -145,10 +141,7 @@
 				448432D324B4151500837E64 /* awesome.wav */,
 				442CAC0624B398E9009E8E97 /* impact.wav */,
 				442CAC0224B386A4009E8E97 /* woosh.wav */,
-				44AA62F02484E36400B5F6F7 /* smoke.sks */,
-				44AA62F12484E36400B5F6F7 /* Assets.xcassets */,
 				44AAD9E02483159900E472BA /* Fonts */,
-				44F92DEC247AEB020072096E /* BoxShootingAnimation.atlas */,
 				44FECD4A2473209E00805D0F /* LaunchScreen.storyboard */,
 				44FECD482473209E00805D0F /* Assets.xcassets */,
 			);
@@ -160,6 +153,7 @@
 			children = (
 				44FECD432473209D00805D0F /* GameViewController.swift */,
 				44FECD412473209D00805D0F /* MenuScene.swift */,
+				442B4923259FBA31008A9EAC /* TutorialScene.swift */,
 				44FECD53247321E100805D0F /* GameScene.swift */,
 				44558F58247F9BEF00CB85E5 /* GameOverScene.swift */,
 			);
@@ -180,8 +174,8 @@
 				4471AB8C24B057C5007E6B45 /* AudioManager.swift */,
 				4422392F24958D5F0057EE42 /* PrecisionRating.swift */,
 				444F964A249B386B001C205A /* PrecisionLabelPanel.swift */,
+				4409874725706138009A076C /* PrecisionLabelHandler.swift */,
 				44F3BAEB248C328D000A5CA4 /* ShopBox.swift */,
-				44040F7A24ABC6000097C0B5 /* ShopBoxDisplay.swift */,
 				444061E824CAAE30001C572C /* SettingsButton.swift */,
 			);
 			path = Model;
@@ -192,7 +186,7 @@
 			children = (
 				448035142503105400A9963F /* StoreKit.framework */,
 				442C062B24F19A0200BFFB08 /* GameKit.framework */,
-				0EE73D15567B1892248DB4C1 /* Pods_PlopBox.framework */,
+				02E1B927171DFC6677342885 /* Pods_PlopBox.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -200,8 +194,8 @@
 		D8F918FECFE3C853DC83A269 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				F496532B2805A44135292F8F /* Pods-PlopBox.debug.xcconfig */,
-				5775247878BC98A836A0D25A /* Pods-PlopBox.release.xcconfig */,
+				892E1114BA80850C1ABD6797 /* Pods-PlopBox.debug.xcconfig */,
+				7D2476F04A093E9245FC4987 /* Pods-PlopBox.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -213,11 +207,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 44FECD502473209E00805D0F /* Build configuration list for PBXNativeTarget "PlopBox" */;
 			buildPhases = (
-				4B492A100FF77CEA241D4B78 /* [CP] Check Pods Manifest.lock */,
+				64D0DE4AA1AE44E3754C71BD /* [CP] Check Pods Manifest.lock */,
 				44FECD342473209D00805D0F /* Sources */,
 				44FECD352473209D00805D0F /* Frameworks */,
 				44FECD362473209D00805D0F /* Resources */,
-				F767579A4892B29A8694F235 /* [CP] Embed Pods Frameworks */,
+				73D74D85A8B0C94ADDE66095 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -235,7 +229,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1130;
-				LastUpgradeCheck = 1130;
+				LastUpgradeCheck = 1220;
 				ORGANIZATIONNAME = "Juan Erenas";
 				TargetAttributes = {
 					44FECD372473209D00805D0F = {
@@ -267,15 +261,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				44FECD472473209D00805D0F /* Main.storyboard in Resources */,
-				44AA62F22484E36400B5F6F7 /* smoke.sks in Resources */,
 				448432D224B4150500837E64 /* perfect.wav in Resources */,
 				448432D424B4151500837E64 /* awesome.wav in Resources */,
 				442CAC0324B386A4009E8E97 /* woosh.wav in Resources */,
 				442CAC0724B398E9009E8E97 /* impact.wav in Resources */,
-				44F92DED247AEB030072096E /* BoxShootingAnimation.atlas in Resources */,
 				44FECD492473209E00805D0F /* Assets.xcassets in Resources */,
 				4499515924BA64DC0029CF26 /* Hadouken.mp3 in Resources */,
-				44AA62F32484E36400B5F6F7 /* Assets.xcassets in Resources */,
 				443AA279248312F3005A9647 /* Marsh-Stencil.otf in Resources */,
 				44FECD4C2473209E00805D0F /* LaunchScreen.storyboard in Resources */,
 			);
@@ -284,7 +275,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		4B492A100FF77CEA241D4B78 /* [CP] Check Pods Manifest.lock */ = {
+		64D0DE4AA1AE44E3754C71BD /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -306,7 +297,7 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		F767579A4892B29A8694F235 /* [CP] Embed Pods Frameworks */ = {
+		73D74D85A8B0C94ADDE66095 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -337,9 +328,10 @@
 				44558F59247F9BEF00CB85E5 /* GameOverScene.swift in Sources */,
 				44E9F5D124FC288500DD590C /* IAPHelper.swift in Sources */,
 				44FECD442473209D00805D0F /* GameViewController.swift in Sources */,
-				44040F7B24ABC6000097C0B5 /* ShopBoxDisplay.swift in Sources */,
 				44F3BAEC248C328D000A5CA4 /* ShopBox.swift in Sources */,
 				44FECD54247321E100805D0F /* GameScene.swift in Sources */,
+				442B4924259FBA31008A9EAC /* TutorialScene.swift in Sources */,
+				4409874825706138009A076C /* PrecisionLabelHandler.swift in Sources */,
 				444061E924CAAE30001C572C /* SettingsButton.swift in Sources */,
 				4467EC7124736C7000BDAA4D /* Box.swift in Sources */,
 				4467EC7324736F2500BDAA4D /* Settings.swift in Sources */,
@@ -400,6 +392,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -424,7 +417,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -460,6 +453,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -478,7 +472,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -490,7 +484,7 @@
 		};
 		44FECD512473209E00805D0F /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = F496532B2805A44135292F8F /* Pods-PlopBox.debug.xcconfig */;
+			baseConfigurationReference = 892E1114BA80850C1ABD6797 /* Pods-PlopBox.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "Apple Development";
@@ -511,7 +505,7 @@
 		};
 		44FECD522473209E00805D0F /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 5775247878BC98A836A0D25A /* Pods-PlopBox.release.xcconfig */;
+			baseConfigurationReference = 7D2476F04A093E9245FC4987 /* Pods-PlopBox.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "Apple Development";

@@ -1,15 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "Box-Holder.png",
+      "filename" : "box-holder_1.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
+      "filename" : "box-holder_1@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
+      "filename" : "box-holder_1@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

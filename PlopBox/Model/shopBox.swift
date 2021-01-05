@@ -10,12 +10,10 @@ import Foundation
 
 struct ShopBox {
     var name : String
-    var price : Int
     var locked : Bool
     
-    init(name: String,price: Int,locked: Bool) {
+    init(name: String,locked: Bool) {
         self.name = name
-        self.price = price
         self.locked = locked
     }
 }

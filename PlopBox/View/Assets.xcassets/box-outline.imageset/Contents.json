@@ -6,10 +6,12 @@
       "scale" : "1x"
     },
     {
+      "filename" : "box-outline@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
+      "filename" : "box-outline@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

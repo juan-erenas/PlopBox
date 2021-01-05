@@ -31,6 +31,8 @@ class BoxSet : SKNode {
     
     private var unusedBoxHolderArray : [SKSpriteNode] = []
     private var unusedBoxArray : [SKSpriteNode] = []
+    private var unusedInvisibleBoxArray : [InvisibleBox] = []
+    private var unusedShooterBoxArray : [SKSpriteNode] = []
     
     private var boxesDeployed = 3
     private var invisibleBoxesDeployed = 0
@@ -57,6 +59,10 @@ class BoxSet : SKNode {
         center = position
         self.shootPoint = shootPoint
         boxHeightAndWidth = screenSize.width / 5.5
+        //make smaller for ipad screens
+        if screenSize.width > 926 {
+            boxHeightAndWidth = screenSize.width / 1.5 / 5.5
+        }
         boxSpacing = boxHeightAndWidth / 4
         removeBoxPosition = CGPoint(x: center.x, y: center.y - (screenSize.height/2) - boxHeightAndWidth - 5)
         firstBoxPosition = CGPoint(x: center.x, y: center.y + (screenSize.height/2) - (boxHeightAndWidth/2) - boxSpacing)
@@ -130,7 +136,15 @@ class BoxSet : SKNode {
     }
     
     private func createBox(AtPos pos: CGPoint,andSize boxSize: CGSize) -> SKSpriteNode {
-        let box = Box(size: boxSize,imageNamed: boxName,texture: boxTexture)
+        var box : SKSpriteNode
+        
+        if unusedBoxArray.count != 0 {
+            box = unusedBoxArray[0]
+            unusedBoxArray.remove(at: 0)
+        } else {
+            box = Box(size: boxSize,imageNamed: boxName,texture: boxTexture)
+        }
+        
         box.position = pos
         
         return box
@@ -148,7 +162,16 @@ class BoxSet : SKNode {
         
         let totalDistance = screenSize.height + boxHeightAndWidth
         
-        let invisibleBox = InvisibleBox(size: CGSize(width: boxHeightAndWidth, height: boxHeightAndWidth))
+        var invisibleBox : InvisibleBox
+        
+        //check if there's a box that can be recycled
+        if unusedInvisibleBoxArray.count != 0 {
+            invisibleBox = unusedInvisibleBoxArray[0]
+            unusedInvisibleBoxArray.remove(at: 0)
+        } else {
+            invisibleBox = InvisibleBox(size: CGSize(width: boxHeightAndWidth, height: boxHeightAndWidth))
+        }
+        
         invisibleBox.position = boxSpawnLocation
         
         if alreadyContainsEmptySpace == false {
@@ -166,10 +189,20 @@ class BoxSet : SKNode {
         let distanceLeftOfBoxes = center.x - self.frame.minX
         let holderXPos = center.x - ((distanceLeftOfBoxes * 0.05) / 2)
         let holderSize = CGSize(width: boxHeightAndWidth * 0.2, height: boxHeightAndWidth * 0.4)
-        let boxHolder = SKSpriteNode(texture: boxHolderTexture, size: holderSize)
+        
+        var boxHolder : SKSpriteNode
+        //Check if there's boxHolders that can be recycled
+        if unusedBoxHolderArray.count != 0 {
+            boxHolder = unusedBoxHolderArray[0]
+            unusedBoxHolderArray.remove(at: 0)
+        } else {
+            boxHolder = SKSpriteNode(texture: boxHolderTexture, size: holderSize)
+        }
+        
         boxHolder.position = CGPoint(x: holderXPos, y: pos.y)
-        boxHolder.zPosition = -10
+        boxHolder.zPosition = -1
         boxHolder.name = "box holder"
+        boxHolder.blendMode = .replace
         return boxHolder
     }
     
@@ -251,7 +284,7 @@ class BoxSet : SKNode {
             if lastBox.position.y <= yRemovalPos {
                 lastBox.removeFromParent()
                 boxArray.remove(at: 0)
-                print("box removed")
+                recycle(node: lastBox)
             }
         }
         
@@ -260,7 +293,7 @@ class BoxSet : SKNode {
             if lastShooterBox.position.y <= yRemovalPos {
                 lastShooterBox.removeFromParent()
                 shooterBoxArray.remove(at: 0)
-                print("shooter box removed")
+                recycle(node: lastShooterBox)
             }
         }
         
@@ -270,6 +303,7 @@ class BoxSet : SKNode {
                 if boxHolder.position.y <= yRemovalPos {
                     boxHolder.removeFromParent()
                     boxHolderArray.remove(at: index)
+                    recycle(node: boxHolder)
                 }
             }
         }
@@ -285,8 +319,37 @@ class BoxSet : SKNode {
         }
     }
     
-    //MARK: - Ending Game
+    private func recycle(node: SKSpriteNode) {
+        let nodeName = node.name
+        node.removeFromParent()
+
+        switch nodeName {
+        case "box":
+            let box = node as! Box
+            box.hasBeenChecked = false
+            unusedBoxArray.append(box)
+        case "invisible box":
+            let invisibleBox = node as! InvisibleBox
+            unusedInvisibleBoxArray.append(invisibleBox)
+            invisibleBox.hasBeenChecked = false
+        case "shooter box":
+            unusedShooterBoxArray.append(node)
+        case "box holder":
+            unusedBoxHolderArray.append(node)
+        default:
+            print("A node was sent to be recycled but is not a recycleable node.")
+            return
+        }
+        
+        print("Unused boxes: \(unusedBoxArray.count)")
+        print("Unused invisible boxes: \(unusedInvisibleBoxArray.count)")
+        print("Unused box holders: \(unusedBoxHolderArray.count)")
+        print("Unused shooter boxes: \(unusedShooterBoxArray.count)")
+        print("///////")
+        
+    }
     
+    //MARK: - Ending Game
     private func endGame(forInvisibleBox invisibleBox: InvisibleBox) {
         invisibleBox.turnRed()
     }
@@ -295,9 +358,7 @@ class BoxSet : SKNode {
     //MARK: - Adding Shooter Box
     
     func addShooterBoxToLine(atYPos yPos: CGFloat) {
-       
-        
-        //Creat Box
+        //Create Box
         let box = createBox(AtPos: CGPoint(x: center.x, y: yPos), andSize: CGSize(width: boxHeightAndWidth, height: boxHeightAndWidth))
         self.addChild(box)
         shooterBoxArray.append(box)
@@ -320,6 +381,10 @@ class BoxSet : SKNode {
     private func checkAccuracyOf(box: Box) {
         let boxYPos = box.position.y
         //add code to check accuracy and deal with it
+        if invisibleBoxArray.count == 0 {
+            return
+        }
+        
         let targetInvisibleBox = invisibleBoxArray[0]
         let distanceToTarget = abs(targetInvisibleBox.position.y - boxYPos)
         
@@ -341,6 +406,11 @@ class BoxSet : SKNode {
             
         targetInvisibleBox.removeTarget()
         invisibleBoxArray.remove(at: 0)
+        
+        //not sure if it should be removed at this point?
+        targetInvisibleBox.removeFromParent()
+        recycle(node: targetInvisibleBox)
+        
         if invisibleBoxArray.count == 0 {return}
         let newTarget = invisibleBoxArray[0]
         newTarget.createTarget()

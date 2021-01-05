@@ -40,14 +40,14 @@ class ShooterBox : SKSpriteNode {
         self.physicsBody?.categoryBitMask = PhysicsCategories.shooterCategory
         self.physicsBody?.contactTestBitMask = PhysicsCategories.boxCategory
         self.physicsBody?.collisionBitMask = PhysicsCategories.boxCategory | PhysicsCategories.shooterCategory
-        self.physicsBody?.usesPreciseCollisionDetection = true
+//        self.physicsBody?.usesPreciseCollisionDetection = true
     }
     
     func removePhysicsBody() {
         self.physicsBody?.categoryBitMask = PhysicsCategories.none
         self.physicsBody?.contactTestBitMask = PhysicsCategories.none
         self.physicsBody?.collisionBitMask = PhysicsCategories.none
-        self.physicsBody?.usesPreciseCollisionDetection = true
+//        self.physicsBody?.usesPreciseCollisionDetection = true
     }
     
     

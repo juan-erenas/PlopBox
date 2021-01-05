@@ -11,12 +11,13 @@ import SpriteKit
 import GameplayKit
 import GameKit
 import AVFoundation
-import GoogleMobileAds
+import StoreKit
+import FBAudienceNetwork
 
 class GameViewController: UIViewController {
     
-    var bannerView: GADBannerView!
-    var rewardedAd: GADRewardedAd?
+    var rewardedFBAd: FBRewardedVideoAd?
+    
     var isReadyToPlayAd = false
     var didEarnReward = false
     
@@ -48,15 +49,11 @@ class GameViewController: UIViewController {
         
             view.ignoresSiblingOrder = true
             
-            view.showsFPS = true
-            view.showsNodeCount = true
+//            view.showsFPS = true
+//            view.showsNodeCount = true
 //            view.showsPhysics = true
+//            view.showsDrawCount = true
             
-            
-            //initializes mobile ads
-            GADMobileAds.sharedInstance().start { (_) in
-//                self.prepareBannerAd()
-            }
         }
     }
     
@@ -91,9 +88,9 @@ class GameViewController: UIViewController {
         
         NotificationCenter.default.addObserver(self, selector: #selector(GameViewController.stopBackgroundSound), name: NSNotification.Name(rawValue: "StopBackgroundSound"), object: nil)
         
-        NotificationCenter.default.addObserver(self, selector: #selector(GameViewController.prepareRewardAd), name: NSNotification.Name(rawValue: "BeginLoadingAd"), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(GameViewController.loadRewardedAd), name: NSNotification.Name(rawValue: "BeginLoadingAd"), object: nil)
         
-        NotificationCenter.default.addObserver(self, selector: #selector(GameViewController.playAd), name: NSNotification.Name(rawValue: "PlayAd"), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(GameViewController.showRewardedAd), name: NSNotification.Name(rawValue: "PlayAd"), object: nil)
         
         NotificationCenter.default.addObserver(self, selector: #selector(GameViewController.showLeaderboards), name: NSNotification.Name(rawValue: "ShowLeaderboards"), object: nil)
         
@@ -120,12 +117,12 @@ class GameViewController: UIViewController {
             let file = try AVAudioFile(forReading: fileURL)
             
             audioPlayer.scheduleFile(file, at: nil)
-
+            
             try engine.start()
             audioPlayer.scheduleFile(file, at: nil, completionCallbackType: .dataConsumed) { (_) in
                 self.scheduleFileToBePlayed()
             }
-
+            
             audioPlayer.play()
             playBackgroundSoundLow()
             
@@ -143,7 +140,7 @@ class GameViewController: UIViewController {
         
         do {
             let file = try AVAudioFile(forReading: fileURL)
-            audioPlayer.scheduleFile(file, at: nil, completionCallbackType: .dataPlayedBack) { (_) in
+            audioPlayer.scheduleFile(file, at: nil, completionCallbackType: .dataConsumed) { (_) in
                 self.scheduleFileToBePlayed()
             }
         } catch {return}
@@ -153,24 +150,53 @@ class GameViewController: UIViewController {
     
     @objc func playBackgroundSoundLow() {
         
+        //Check if sound should be played first
+        let userPrefersNoMusic = UserDefaults.standard.bool(forKey: "prefers-no-music")
+        if userPrefersNoMusic {
+            audioPlayer.pause()
+            return
+        }
+        
         pitchControl.pitch = -100
         speedControl.rate = 0.75
         audioPlayer.volume = 0.20
         
-        if engine.isRunning { return }
+        //Check if engine is running
+        if engine.isRunning {
+            audioPlayer.play()
+            return
+        }
+        
+        //If it's not running, make it run
             do {
                 try engine.start()
+                audioPlayer.play()
             } catch {return}
     }
     
     @objc func playBackgroundSoundHigh() {
+        
+        //Check if sound should be played first
+        let userPrefersNoMusic = UserDefaults.standard.bool(forKey: "prefers-no-music")
+        if userPrefersNoMusic {
+            audioPlayer.pause()
+            return
+        }
+        
         pitchControl.pitch = 0.0
         speedControl.rate = 1
         audioPlayer.volume = 1
         
-        if engine.isRunning { return }
+        //Check if engine is running
+        if engine.isRunning {
+            audioPlayer.play()
+            return
+        }
+        
+        //If it's not running, make it run
         do {
             try engine.start()
+            audioPlayer.play()
         } catch {return}
     }
     
@@ -206,12 +232,12 @@ class GameViewController: UIViewController {
     }
 
     override var shouldAutorotate: Bool {
-        return true
+        return false
     }
 
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
         if UIDevice.current.userInterfaceIdiom == .phone {
-            return .allButUpsideDown
+            return .portrait
         } else {
             return .all
         }
@@ -222,69 +248,40 @@ class GameViewController: UIViewController {
     }
 }
 
-extension GameViewController : GADRewardedAdDelegate {
+//MARK: - Ads Handler
+
+extension GameViewController : FBRewardedVideoAdDelegate {
     
-    func prepareBannerAd() {
-        bannerView = GADBannerView(adSize: kGADAdSizeSmartBannerPortrait)
-        addBannerViewToView(bannerView)
-        bannerView.adUnitID = "ca-app-pub-3940256099942544/2934735716"
-        bannerView.rootViewController = self
-        bannerView.load(GADRequest())
+    //Call to begin loading ad
+    @objc func loadRewardedAd() {
+        self.rewardedFBAd = FBRewardedVideoAd(placementID: "398548941207170_398610271201037")
+        self.rewardedFBAd?.delegate = self
+        self.rewardedFBAd?.load()
     }
     
-    func addBannerViewToView(_ bannerView: GADBannerView) {
-     bannerView.translatesAutoresizingMaskIntoConstraints = false
-     view.addSubview(bannerView)
-     view.addConstraints(
-       [NSLayoutConstraint(item: bannerView,
-                           attribute: .bottom,
-                           relatedBy: .equal,
-                           toItem: bottomLayoutGuide,
-                           attribute: .top,
-                           multiplier: 1,
-                           constant: 0),
-        NSLayoutConstraint(item: bannerView,
-                           attribute: .centerX,
-                           relatedBy: .equal,
-                           toItem: view,
-                           attribute: .centerX,
-                           multiplier: 1,
-                           constant: 0)
-       ])
-    }
-    
-    
-    @objc func prepareRewardAd() {
-        rewardedAd = GADRewardedAd(adUnitID: "ca-app-pub-3940256099942544/1712485313")
-        rewardedAd?.load(GADRequest()) { error in
-          if let error = error {
-            // Handle ad failed to load case.
-            print("Failed to load with error: \(error)")
-          } else {
-            // Ad successfully loaded.
-            
-            //Check if playAd has already been called
-            //If so, play ad immediately
-            if self.isReadyToPlayAd == false {return}
-            self.playAd()
-          }
+    @objc func showRewardedAd() {
+        
+        if rewardedFBAd == nil {
+            print("Error: Attempted to show rewarded ad when rewarded ad is nil.")
+            return
         }
-    }
-    
-    @objc func playAd() {
-        if rewardedAd?.isReady == true {
-            rewardedAd?.present(fromRootViewController: self, delegate:self)
+        
+        if self.rewardedFBAd!.isAdValid {
+            rewardedFBAd?.show(fromRootViewController: self)
+            isReadyToPlayAd = false
         } else {
             isReadyToPlayAd = true
         }
     }
     
-    func rewardedAd(_ rewardedAd: GADRewardedAd, userDidEarn reward: GADAdReward) {
-        //called after the user has played the video long enough
-        didEarnReward = true
+    func rewardedVideoAdDidLoad(_ rewardedVideoAd: FBRewardedVideoAd) {
+        //Check if playAd has already been called
+        //If so, play ad immediately
+        if self.isReadyToPlayAd == false {return}
+        self.showRewardedAd()
     }
     
-    func rewardedAdDidDismiss(_ rewardedAd: GADRewardedAd) {
+    func rewardedVideoAdDidClose(_ rewardedVideoAd: FBRewardedVideoAd) {
         
         var completionDict : [String : Bool]
         
@@ -299,19 +296,27 @@ extension GameViewController : GADRewardedAdDelegate {
         didEarnReward = false
     }
     
-    func rewardedAdDidPresent(_ rewardedAd: GADRewardedAd) {
-        
-        if let view = self.view as! SKView? {
-            view.scene?.removeFromParent()
-        }
+    func rewardedVideoAdVideoComplete(_ rewardedVideoAd: FBRewardedVideoAd) {
+        didEarnReward = true
     }
-
-    //Called when ad failed to present
-    func rewardedAd(_ rewardedAd: GADRewardedAd, didFailToPresentWithError error: Error) {
+    
+    func rewardedVideoAd(_ rewardedVideoAd: FBRewardedVideoAd, didFailWithError error: Error) {
+        //add failed to load error
+        NotificationCenter.default.post(name: Notification.Name(rawValue: "CouldNotPlayAd"), object: self)
         
+        print("Rewarded ad did fail with error: \(error)")
     }
+    
+    func rewardedVideoAdServerRewardDidFail(_ rewardedVideoAd: FBRewardedVideoAd) {
+        //add failed to load error
+        NotificationCenter.default.post(name: Notification.Name(rawValue: "CouldNotPlayAd"), object: self)
+        
+        print("rewarded video ad server reward did fail.")
+    }
+    
 }
 
+//MARK: - Game Center Handler
 
 extension GameViewController : GKGameCenterControllerDelegate {
 
@@ -346,19 +351,6 @@ extension GameViewController : GKGameCenterControllerDelegate {
     present(vc, animated: true, completion: nil)
   }
 
-  private func unlockAchievement() {
-    let achievement = GKAchievement(identifier: "finished800level")
-    achievement.percentComplete = 100
-    achievement.showsCompletionBanner = true
-    GKAchievement.report([achievement]) { error in
-      guard error == nil else {
-        print(error?.localizedDescription ?? "")
-        return
-      }
-      print("done!")
-    }
-  }
-
   @objc private func submitNewScore(_ notification : NSNotification) {
     let score = GKScore(leaderboardIdentifier: "PlopBoxLeaderBoard")
     
@@ -386,7 +378,9 @@ extension GameViewController : GKGameCenterControllerDelegate {
     
     
 }
+
  //MARK: IAP Handler
+
 extension GameViewController {
     
     func loadProducts() {
@@ -394,6 +388,7 @@ extension GameViewController {
         //If iPhone cannot make payments, do not request products
         if !IAPHelper.canMakePayments() {
             NotificationCenter.default.post(name: Notification.Name(rawValue: "GrayOutNoAdsButtton"), object: self)
+            print("User cannot make payments.")
             return
         }
         
@@ -404,6 +399,7 @@ extension GameViewController {
             self.checkIfPurchased()
           } else {
             NotificationCenter.default.post(name: Notification.Name(rawValue: "GrayOutNoAdsButtton"), object: self)
+            print("failed to load products.")
             }
         }
     }
@@ -430,6 +426,28 @@ extension GameViewController {
         
     }
     
+    
+    
+}
+
+//MARK: - Alert Handler
+
+extension GameViewController {
+    
+    @objc func showAlert(_ notification: NSNotification) {
+        
+        if let userInfo = notification.userInfo {
+            let message = userInfo["message"] as! String
+            let title = userInfo["title"] as! String
+            
+            let myAlert: UIAlertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
+            myAlert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+            self.present(myAlert, animated: true, completion: nil)
+            
+        } else {
+            print("Did not receive userinfo in show alert request.")
+        }
+    }
     
     
 }

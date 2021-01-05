@@ -10,12 +10,13 @@ import SpriteKit
 
 class BoxShooter : SKSpriteNode {
     
-    private var BoxShooterFrames : [SKTexture] = []
-    var readyToShoot = false
-    
+    var isShooting = false
+    let shooterHead = SKSpriteNode(imageNamed: "box-shooter-head")
+    var contractedHeadPos = CGPoint()
+    var extendedHeadPos = CGPoint()
     
     init(size: CGSize) {
-        super.init(texture: SKTexture(imageNamed: "BoxShotting001"), color: .clear, size: size)
+        super.init(texture: SKTexture(imageNamed: "box-shooter-body"), color: .clear, size: size)
         configureBoxShooter()
     }
     
@@ -24,41 +25,34 @@ class BoxShooter : SKSpriteNode {
     }
     
     private func configureBoxShooter() {
-        self.zPosition = 10
+        self.zPosition = 0
         self.anchorPoint = CGPoint(x: 0, y: 0.5)
         
-        let boxShooterAnimatedAtlas = SKTextureAtlas(named: "BoxShootingAnimation")
+        //add head of shooter as child
+        shooterHead.anchorPoint = CGPoint(x: 1, y: 0.5)
+        let height = self.size.width * 1.2
+        shooterHead.size = CGSize(width: height - (height * 0.2), height: height)
+        shooterHead.position = self.position
+        shooterHead.zPosition = 1
+        self.addChild(shooterHead)
         
-        var shootFrames : [SKTexture] = []
-        
-        boxShooterAnimatedAtlas.preload {
-            
-            //this code is called after swift is done preloading
-            let numImages = boxShooterAnimatedAtlas.textureNames.count
-            for i in 1...numImages {
-                let boxShooterTextureName = "BoxShotting00\(i)"
-                shootFrames.append(boxShooterAnimatedAtlas.textureNamed(boxShooterTextureName))
-            }
-            self.BoxShooterFrames = shootFrames
-            
-            let firstFrameTexture = self.BoxShooterFrames[0]
-            self.texture = firstFrameTexture
-            self.readyToShoot = true
-        }
-        
+        extendedHeadPos = shooterHead.position
+        contractedHeadPos = CGPoint(x: shooterHead.position.x + self.size.width * 0.4, y: shooterHead.position.y)
     }
     
     func shoot() {
         
-        let shoot = SKAction.animate(with: BoxShooterFrames, timePerFrame: 1/120,resize: false,restore: true)
-//        shoot.value(forKey: "BoxShootingAnimation")
-        self.run(shoot)
-    }
-    
-    func preloadTextureAtlas() {
+        isShooting = true
+        let shoot = SKAction.moveTo(x: contractedHeadPos.x, duration: 0.06)
+        let slowlyExtend = SKAction.moveTo(x: extendedHeadPos.x, duration: 0.3)
+        shoot.timingMode = .easeOut
+        slowlyExtend.timingMode = .easeOut
+        let isNotShooting = SKAction.customAction(withDuration: 0) { (_, _) in
+            self.isShooting = false
+        }
+        
+        let sequence = SKAction.sequence([shoot,slowlyExtend,isNotShooting])
+        shooterHead.run(sequence)
         
     }
-    
-    
-    
 }

@@ -1,6 +1,7 @@
 
 
 import StoreKit
+import SwiftKeychainWrapper
 
 public typealias ProductIdentifier = String
 public typealias ProductsRequestCompletionHandler = (_ success: Bool, _ products: [SKProduct]?) -> Void
@@ -19,13 +20,13 @@ open class IAPHelper: NSObject  {
   public init(productIds: Set<ProductIdentifier>) {
     productIdentifiers = productIds
     for productIdentifier in productIds {
-      let purchased = UserDefaults.standard.bool(forKey: productIdentifier)
-      if purchased {
-        purchasedProductIdentifiers.insert(productIdentifier)
-        print("Previously purchased: \(productIdentifier)")
-      } else {
-        print("Not purchased: \(productIdentifier)")
-      }
+        let purchased = KeychainWrapper.standard.bool(forKey: productIdentifier) ?? false
+        if purchased {
+            purchasedProductIdentifiers.insert(productIdentifier)
+            print("Previously purchased: \(productIdentifier)")
+        } else {
+            print("Not purchased: \(productIdentifier)")
+        }
     }
     super.init()
 
@@ -70,7 +71,7 @@ extension IAPHelper {
 extension IAPHelper: SKProductsRequestDelegate {
 
   public func productsRequest(_ request: SKProductsRequest, didReceive response: SKProductsResponse) {
-    print("Loaded list of products...")
+    print("Loaded list of products... \(response.products.count) products loaded.")
     let products = response.products
     productsRequestCompletionHandler?(true, products)
     clearRequestAndHandler()
@@ -121,6 +122,7 @@ extension IAPHelper: SKPaymentTransactionObserver {
     print("complete...")
     deliverPurchaseNotificationFor(identifier: transaction.payment.productIdentifier)
     SKPaymentQueue.default().finishTransaction(transaction)
+    showAlertWith(message: "Purchase successful. Enjoy PlopBox without ads!", title: "Success!")
   }
 
   private func restore(transaction: SKPaymentTransaction) {
@@ -129,6 +131,7 @@ extension IAPHelper: SKPaymentTransactionObserver {
     print("restore... \(productIdentifier)")
     deliverPurchaseNotificationFor(identifier: productIdentifier)
     SKPaymentQueue.default().finishTransaction(transaction)
+    showAlertWith(message: "Restore successful. Enjoy PlopBox without ads!", title: "Success!")
   }
 
   private func fail(transaction: SKPaymentTransaction) {
@@ -138,6 +141,8 @@ extension IAPHelper: SKPaymentTransactionObserver {
         transactionError.code != SKError.paymentCancelled.rawValue {
         print("Transaction Error: \(localizedDescription)")
       }
+    
+    showAlertWith(message: "There was an error processing your purchase. Try again later.", title: "Error")
 
     SKPaymentQueue.default().finishTransaction(transaction)
   }
@@ -146,7 +151,15 @@ extension IAPHelper: SKPaymentTransactionObserver {
     guard let identifier = identifier else { return }
 
     purchasedProductIdentifiers.insert(identifier)
-    UserDefaults.standard.set(true, forKey: identifier)
+    KeychainWrapper.standard.set(true, forKey: identifier)
+//    UserDefaults.standard.set(true, forKey: identifier)
     NotificationCenter.default.post(name: .IAPHelperPurchaseNotification, object: identifier)
   }
+    
+    private func showAlertWith(message: String, title: String) {
+        
+        let userInfo = ["message":message,"title":title]
+        NotificationCenter.default.post(name: Notification.Name(rawValue: "ShowAlert"), object: self,userInfo: userInfo)
+        
+    }
 }

@@ -20,6 +20,8 @@ class GameScene: SKScene {
     
     private var player: AVAudioPlayer?
     
+    private var precisionLabelHandler: PrecisionLabelHandler!
+    
     private var worldNode = SKNode()
     private var leftNode = SKNode()
     private var rightNode = SKNode()
@@ -55,6 +57,7 @@ class GameScene: SKScene {
         addBoxShooter()
         addBoxSet()
         createBackground()
+        createPrecisionLabelHandler()
         
         addConveyorBelt()
         addIntroAnimation()
@@ -176,12 +179,20 @@ class GameScene: SKScene {
     }
     
     func addShootingBox() {
-        let size = self.frame.width / 5.5
-        
+        var size = self.frame.width / 5.5
+
         let fourthOfWidth = self.frame.width/4
         let fourthOfHeight = self.frame.height/4
-        let xPos = self.frame.midX + fourthOfWidth - (size/2)
+        
+        var xPos = self.frame.midX + fourthOfWidth - (size/2)
         let yPos = self.frame.midY - fourthOfHeight
+        
+        //make smaller for ipads
+        if self.frame.width > 428 {
+            size = self.frame.width / 1.5 / 5.5
+            xPos = self.frame.maxX - size*2 - size*0.2
+        }
+        
         let position = CGPoint(x: xPos, y: yPos)
         
         shootingBox = ShooterBox(size: CGSize(width: size, height: size),position: position,imageNamed: equipedBoxName!)
@@ -190,31 +201,42 @@ class GameScene: SKScene {
     }
     
     func addBoxShooter() {
-        let height : CGFloat = shootingBox.size.height + shootingBox.size.height/7
-        let width : CGFloat = height / 9 * 16
+        let height : CGFloat = shootingBox.size.height / 1.55 //image's aspect ratio
+        let width : CGFloat = height * 1.55
         boxShooter = BoxShooter(size: CGSize(width: width, height: height))
-        boxShooter.position = CGPoint(x: shootingBox.position.x + (shootingBox.size.width/5), y: shootingBox.position.y)
+        boxShooter.position = CGPoint(x: shootingBox.position.x + (shootingBox.size.width * 1.2), y: shootingBox.position.y)
         
         rightNode.addChild(boxShooter)
     }
     
     func createScoreLabel() {
+        //Resizes nodes if on iPads
+        var resizeRatio : CGFloat = 1
+        if self.frame.height > 926 {
+            resizeRatio = self.frame.height / 896
+        }
         scoreLabel = SKLabelNode(text: "\(currentScore)")
         scoreLabel!.fontName = "AvenirNext-Bold"
-        scoreLabel!.fontSize = 50.0
+        scoreLabel!.fontSize = 50.0 * resizeRatio
         scoreLabel?.horizontalAlignmentMode = .center
         scoreLabel?.verticalAlignmentMode = .center
         let color = UIColor(red: 80/255, green: 95/255, blue: 103/255, alpha: 1)
         scoreLabel!.fontColor = color
         scoreLabel!.position = CGPoint(x: frame.midX, y: frame.maxY - frame.height/15)
-        scoreLabel!.zPosition = 11
+        scoreLabel!.zPosition = 0
         worldNode.addChild(scoreLabel!)
     }
     
     func createMoneyLabel() {
+        var resizeRatio : CGFloat = 1
+        if self.frame.height > 926 {
+            resizeRatio = self.frame.height / 896
+        }
+        
         let coin = SKSpriteNode(imageNamed: "Coin")
-        coin.size = CGSize(width: 30.0, height: 30.0)
-        coin.position = CGPoint(x: frame.maxX - 30, y: frame.maxY - 30)
+        coin.size = CGSize(width: 30.0 * resizeRatio, height: 30.0 * resizeRatio)
+        coin.position = CGPoint(x: frame.maxX - coin.size.height * 1.6, y: frame.maxY - 45)
+        coin.zPosition = 0
         worldNode.addChild(coin)
         
         let currencyText = KeychainWrapper.standard.string(forKey: "coins")
@@ -223,13 +245,22 @@ class GameScene: SKScene {
         moneyLabel = SKLabelNode(text: currencyText)
         moneyLabel.fontName = "AvenirNext-Bold"
         moneyLabel.name = "change player"
-        moneyLabel.fontSize = 30.0
+        moneyLabel.fontSize = 30.0 * resizeRatio
         moneyLabel.color = UIColor(red: 80/255, green: 95/255, blue: 103/255, alpha: 1)
         moneyLabel.colorBlendFactor = 1
         moneyLabel.horizontalAlignmentMode = .right
         moneyLabel.verticalAlignmentMode = .center
-        moneyLabel.position = CGPoint(x: coin.position.x - 20, y: coin.position.y)
+        moneyLabel.position = CGPoint(x: coin.position.x - coin.size.width * 0.7, y: coin.position.y)
+        moneyLabel.zPosition = 0
         worldNode.addChild(moneyLabel)
+    }
+    
+    func createPrecisionLabelHandler() {
+        
+        precisionLabelHandler = PrecisionLabelHandler(size: self.frame.size, animationDuration: Double(boxSet.moveBoxDuration / 6))
+        precisionLabelHandler.position = CGPoint(x: self.frame.midX, y: self.frame.midY)
+        worldNode.addChild(precisionLabelHandler)
+        
     }
     
 
@@ -256,6 +287,7 @@ class GameScene: SKScene {
         let belt = SKSpriteNode(texture: SKTexture(imageNamed: "Conveyor-Belt"), size: size)
         belt.anchorPoint = CGPoint(x: 0, y: 1)
         belt.position = pos
+        belt.zPosition = 0
         leftNode.addChild(belt)
     }
     
@@ -268,7 +300,7 @@ class GameScene: SKScene {
         }
         
         if currentScore == 10 && canRetry == true {
-            NotificationCenter.default.post(name: Notification.Name(rawValue: "BeginLoadingAd"), object: self)
+//            NotificationCenter.default.post(name: Notification.Name(rawValue: "BeginLoadingAd"), object: self)
         }
     }
     
@@ -320,8 +352,6 @@ class GameScene: SKScene {
     
     //MARK: - Shoot Box Handler
     @objc func shootBox() {
-        //box shooter needs a second to load the textures, and then it's ready
-        if boxShooter.readyToShoot == false {return}
         //used to avoid shooting while already firing
         if shootingBox.currentlyShooting == true {return}
         //prevents shooting before intro animation is complete
@@ -336,7 +366,14 @@ class GameScene: SKScene {
         boxSet.makeBoxesDynamic()
 
         let originalPosition = shootingBox.shootingPos
-        let adjustedPosition = CGPoint(x: originalPosition.x + shootingBox.size.width/4, y: originalPosition.y)
+        let adjustedPosition = CGPoint(x: originalPosition.x + shootingBox.size.width * 0.6, y: originalPosition.y)
+        var originalWidth = self.frame.width / 5.5
+        //Original width for iPads
+        if self.frame.width > 414 {
+            originalWidth = self.frame.width / 1.5 / 5.5
+        }
+        shootingBox.size.width = originalWidth
+        let adjustedWidth = originalWidth / 2
         let yPos = shootingBox.position.y
         let move = SKAction.moveTo(x: boxSet.center.x, duration: 0.1)
         let addToLineAndReset = SKAction.customAction(withDuration: 0) { (_, _) in
@@ -346,7 +383,10 @@ class GameScene: SKScene {
             self.shootingBox.removePhysicsBody()
             self.addPointToScore()
             self.boxSet.addShooterBoxToLine(atYPos: yPos)
+            
             self.shootingBox.position = adjustedPosition
+            self.shootingBox.size.width = adjustedWidth
+            
             self.shakeCamera(layer: self.worldNode, duration: 0.1)
             self.boxSet.speedUpBoxes()
             self.shootingBox.currentlyShooting = false
@@ -359,8 +399,11 @@ class GameScene: SKScene {
         }
         
         let comeOutOfBoxShooter = SKAction.moveTo(x: originalPosition.x, duration: 0.5)
+        let returnToOriginalWidth = SKAction.resize(toWidth: originalWidth, duration: 0.5)
         
-        let sequence = SKAction.sequence([move, addToLineAndReset, comeOutOfBoxShooter])
+        let comeOutAndGrow = SKAction.group([comeOutOfBoxShooter,returnToOriginalWidth])
+        
+        let sequence = SKAction.sequence([move, addToLineAndReset, comeOutAndGrow])
         shootingBox.run(sequence)
         
         //Create Sound
@@ -422,7 +465,6 @@ class GameScene: SKScene {
         }
     }
 
-    
     
     // MARK: - Game Over Handler
     func endGame(withWait shouldWait: Bool) {
@@ -515,8 +557,6 @@ extension GameScene: SKPhysicsContactDelegate {
     }
 }
 
-
-
 extension GameScene : BoxSetDelegate {
     func missedTarget() {
         let duration = Double(boxSet.moveBoxDuration / 6)
@@ -530,9 +570,9 @@ extension GameScene : BoxSetDelegate {
     }
     
     func targetHitWith(precisionRating: PrecisionRating) {
-        let precisionLabelPanel = PrecisionLabelPanel(size: self.frame.size, precisionRating: precisionRating, animationDuration: Double(boxSet.moveBoxDuration / 6))
-        precisionLabelPanel.position = CGPoint(x: self.frame.midX, y: self.frame.midY)
-        worldNode.addChild(precisionLabelPanel)
+    
+        precisionLabelHandler.animationDuration = Double(boxSet.moveBoxDuration / 6)
+        precisionLabelHandler.showPanel(withAccuracy: precisionRating)
         
         switch precisionRating {
         case .perfect:

@@ -49,8 +49,8 @@ class InvisibleBox : Box {
     }
     
     func changeColors() {
-        let darkcolor = UIColor(red: 58/255, green: 4/255, blue: 84/255, alpha: 1)
-        let lightColor = UIColor(red: 158/255, green: 109/255, blue: 178/255, alpha: 1)
+        let darkcolor = UIColor(red: 65/255, green: 77/255, blue: 81/255, alpha: 1)
+        let lightColor = UIColor(red: 110/255, green: 131/255, blue: 137/255, alpha: 1)
         
         let changeToDarkColor = SKAction.colorize(with: darkcolor, colorBlendFactor: 1, duration: 0.3)
         let changeToLightColor = SKAction.colorize(with: lightColor, colorBlendFactor: 1, duration: 0.3)

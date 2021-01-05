@@ -1,15 +1,17 @@
 {
   "images" : [
     {
+      "filename" : "plopbox-logo.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "plop-box-logo.png",
+      "filename" : "plopbox-logo@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
+      "filename" : "plopbox-logo@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }
